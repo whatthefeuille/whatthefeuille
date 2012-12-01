@@ -31,6 +31,10 @@ def main(global_config, **settings):
 
     config.include('wtf.models')
 
+    # thumbs
+    config.include('wsgithumb')
+    config.add_thumb_view('thumbs')
+
     # Use our custom Request class
     config.set_request_factory(Request)
 

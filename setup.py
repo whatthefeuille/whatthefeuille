@@ -18,6 +18,8 @@ install_requires = [
     'repoze.who.plugins.browserid',
     'virtualenv', 'Sphinx',
     'wsgiproxy',
+    'wsgithumb',
+    'PIL'
 ]
 
 

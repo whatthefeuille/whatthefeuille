@@ -46,6 +46,7 @@ def main():
         settings = {}
 
     app = webapp(global_config, **settings)
+
     try:
         httpd = make_server(args.host, args.port, app)
         logger.info('WTF ready, at http://%s:%s.' %
