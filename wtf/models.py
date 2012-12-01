@@ -94,18 +94,27 @@ SNAP_MAPPING = {
     },
     'base_x': {
         'type': 'integer',
+        'store': 'yes',
     },
     'base_y': {
         'type': 'integer',
+        'store': 'yes',
     },
     'top_x': {
         'type': 'integer',
+        'store': 'yes',
     },
     'top_y': {
         'type': 'integer',
+        'store': 'yes',
     },
     'plant': {
         'type': 'string',
+        'store': 'yes',
+    },
+    'likes': {
+        'type': 'integer',
+        'store': 'yes',
     },
 }
 
