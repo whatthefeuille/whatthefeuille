@@ -119,7 +119,7 @@ def snapshot(request):
 
     return {'snapshot': filename,
             'messages': request.session.pop_flash(),
-            'user': authenticated_userid(request)}
+            'user': request.user}
 
 
 @view_config(route_name='picture')
@@ -141,7 +141,7 @@ def picture(request):
              renderer='upload.mako')
 def upload(request):
     """Profile page."""
-    if authenticated_userid(request) is None:
+    if request.user is None:
         raise Forbidden()
 
     if 'picture' in request.POST:
@@ -160,5 +160,4 @@ def upload(request):
         request.session.flash('Image uploaded')
         return HTTPFound(location='/snapshot/%s' % basename + ext)
 
-    user = authenticated_userid(request)
-    return {'user': user}
+    return {'user': request.user}
