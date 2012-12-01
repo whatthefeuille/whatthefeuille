@@ -30,14 +30,13 @@
               <li class="active"><a href="#">Home</a></li>
               <li><a href="/about">About</a></li>
               <li><a href="/upload">Upload</a></li>
-              <li>
               %if user:
-              <a href="/profile">Profile</a>&nbsp;<a href="/logout">Logout</a>
+              <li><a href="/profile">Profile</a></li>
+              <li><a href="/logout">Logout</a></li>
               %endif
               %if not user:
-              <a href="/sign" class="sign"><img src="/media/sign_in_blue.png"/></a>
+              <li><a href="/sign" class="sign"><img src="/media/sign_in_blue.png"/></a></li>
               %endif
-              </li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
