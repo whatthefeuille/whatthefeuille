@@ -3,20 +3,22 @@ from setuptools import setup, find_packages
 from wtf import __version__
 
 
-install_requires = ['pyramid',
-                    'paramiko',
-                    'Mako',
-                    'virtualenv', 'Sphinx',
-                    'pyramid_simpleform',
-                    'formencode',
-                    'pyramid_whoauth',
-                    'repoze.who.plugins.browserid',
-                    'pyramid_beaker',
-                    'pyramid_macauth',
-                    'pyramid_multiauth',
-                    'wsgiproxy',
-                    'circus'
-                    ]
+install_requires = [
+    'Mako',
+    'circus',
+    'formencode',
+    'paramiko',
+    'pyes',
+    'pyramid',
+    'pyramid_beaker',
+    'pyramid_macauth',
+    'pyramid_multiauth',
+    'pyramid_simpleform',
+    'pyramid_whoauth',
+    'repoze.who.plugins.browserid',
+    'virtualenv', 'Sphinx',
+    'wsgiproxy',
+]
 
 
 DOCS = os.path.join(os.path.dirname(__file__), 'wtf', 'docs', 'source')
