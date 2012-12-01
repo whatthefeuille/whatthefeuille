@@ -5,6 +5,7 @@
     <link href='/media/wtf.css' rel='stylesheet' type='text/css'/>
     <link href='/media/bootstrap.css' rel='stylesheet' type='text/css'/>
 
+    <script src="/media/js/jquery.js"></script>
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -53,7 +54,6 @@
     </footer>
 
     </div>
-    <script src="/media/js/jquery.js"></script>
     <script src="/media/js/bootstrap-transition.js"></script>
     <script src="/media/js/bootstrap-alert.js"></script>
     <script src="/media/js/bootstrap-modal.js"></script>
