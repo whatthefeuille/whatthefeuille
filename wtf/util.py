@@ -236,3 +236,22 @@ def import_string(import_name, silent=False):
     except ImportError, e:
         if not silent:
             raise ImportStringError(import_name, e), None, sys.exc_info()[2]
+
+
+def make_bid_plugin(audiences, rememberer_name=None, postback_url=None,
+                assertion_field=None, came_from_field=None, csrf_field=None,
+                csrf_cookie_name=None, challenge_body=None, verifier=None,
+                check_https=None, check_referer=None, **kwds):
+
+    from repoze.who.plugins.browserid import make_plugin
+
+    tmpldir = os.path.join(os.path.dirname(__file__), 'templates')
+    challenge_body = os.path.join(tmpldir, 'authentication.html')
+
+    return make_plugin(audiences, rememberer_name, postback_url,
+                       assertion_field, came_from_field, csrf_field,
+                       csrf_cookie_name, challenge_body=challenge_body,
+                       verifier=verifier,
+                       check_https=check_https,
+                       check_referer=check_referer,
+                       **kwds)
