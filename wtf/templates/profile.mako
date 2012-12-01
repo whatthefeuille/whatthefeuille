@@ -10,10 +10,12 @@
 
 <p>Hello ${user.email}!</p>
 
-<ul>
+<ul class="timeline">
     % for snap in snaps:
     <li>
-        <img src="/thumb/small/${basename(snap.filename)}">
+        <a href="/snapshot/${basename(snap.filename)}">
+            <img src="/thumbs/thumb/${basename(snap.filename)}">
+        </a>
     </li>
     % endfor
 </ul>

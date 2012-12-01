@@ -1,4 +1,12 @@
+.sign img {
+    margin-top: 1px;
+}
 
-a.sign img {
-  margin-top: 1px
+.timeline {
+    list-style: none;
+    margin: 0;
+}
+
+.timeline li {
+    margin-bottom: 1em;
 }
