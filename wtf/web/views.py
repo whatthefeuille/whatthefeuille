@@ -152,6 +152,9 @@ def upload(request):
         basename = str(uuid4())
         filename = os.path.join(pic_dir, basename + ext)
 
+        if not os.path.exists(pic_dir):
+            os.makedirs(pic_dir)
+
         with open(filename, 'wb') as target:
             shutil.copyfileobj(pic, target)
 
