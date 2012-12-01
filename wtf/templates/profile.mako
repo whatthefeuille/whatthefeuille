@@ -5,6 +5,9 @@
 %endif
 
 %if user:
+
+<img src="${user_profile_picture}">
+
 <p>Hello ${user.email}!</p>
 
 <ul>

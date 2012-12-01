@@ -17,7 +17,7 @@ from mako.lookup import TemplateLookup
 
 from pyes.query import FieldQuery, FieldParameter
 
-
+from wtf.gravatar import gravatar_image_url
 import wtf
 
 
@@ -58,6 +58,7 @@ def profile(request):
     return {
         'basename': os.path.basename,
         'user': request.user,
+        'user_profile_picture': gravatar_image_url(request.user.email),
         'snaps': snaps,
     }
 
