@@ -11,9 +11,19 @@ body {
     margin-top: 1px;
 }
 
-.snapshot img {
+.snapshot {
     border-radius: 6px;
     box-shadow: 1px 1px #AA9;
+    margin-bottom: 16px;
+}
+
+#pointer_div {
+    position: relative;
+}
+
+#topcross,
+#bottomcross {
+    position: absolute;
 }
 
 .timeline {
