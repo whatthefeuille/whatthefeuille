@@ -4,3 +4,5 @@ lib
 local
 build
 share
+*.pyc
+*.egg-info
