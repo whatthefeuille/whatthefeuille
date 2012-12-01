@@ -14,7 +14,7 @@ import smtplib
 import sys
 
 import tokenlib
-from circus import logger
+from wtf import logger
 
 DEFAULT_ROOT = 'http://localhost'
 DEFAULT_SENDER = 'tarek@localhost'

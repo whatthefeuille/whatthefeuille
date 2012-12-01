@@ -48,18 +48,8 @@ def index(request):
              renderer='profile.mako')
 def profile(request):
     """Profile page."""
-    queue = request.registry['queue']
     user = authenticated_userid(request)
-    if user is None:
-        key = None
-    else:
-        if 'generate' in request.POST:
-            key = generate_key()
-            queue.set_key(user, key)
-        else:
-            key = queue.get_key(user)
-
-    return {'user': user, 'key': key}
+    return {'user': user}
 
 
 @view_config(route_name='about_index')
