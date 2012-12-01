@@ -57,7 +57,8 @@ def _basic(request, existing=None):
 
     if not request.user:
         # set up the cookie
-        request.response.set_cookie('browserid_csrf_token', csrf_token)
+        request.response.set_cookie('browserid_csrf_token', csrf_token,
+                                    path='/login')
 
     if existing is None:
         return basic
