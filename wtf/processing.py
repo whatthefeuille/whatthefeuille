@@ -5,12 +5,45 @@ from skimage import transform as tf
 from skimage.io import imread
 from skimage.io import imsave
 
+from PIL import Image
+
+
+EXIF_TAG_ORIENTATION = 0x0112
 
 WARPED_IMG_SIZE = (500, 500)
 
 
+def save_normalized(fileobj, filename):
+    image = Image.open(fileobj)
+
+    # Resize
+    image.thumbnail(WARPED_IMG_SIZE, Image.ANTIALIAS)
+
+    # Flip / rotate image based on EXIF orientation flag
+    orientation = image._getexif().get(EXIF_TAG_ORIENTATION, None)
+    if orientation == 1:
+        pass
+    elif orientation == 2:
+        image = image.transpose(Image.FLIP_LEFT_RIGHT)
+    elif orientation == 3:
+        image = image.transpose(Image.ROTATE_180)
+    elif orientation == 4:
+        image = image.transpose(Image.FLIP_TOP_BOTTOM)
+    elif orientation == 5:
+        image = image.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.ROTATE_270)
+    elif orientation == 6:
+        image = image.transpose(Image.ROTATE_270)
+    elif orientation == 7:
+        image = image.transpose(Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_270)
+    elif orientation == 8:
+        image = image.transpose(Image.ROTATE_90)
+
+    # Save image
+    image.save(filename)
+
+
 def get_img_size(img_path):
-    """Return the (width, height) size tuple of the image file"""
+    """Return the (height, width) size tuple of the image file"""
     return imread(img_path).shape[:2]
 
 

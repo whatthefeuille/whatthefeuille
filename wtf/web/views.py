@@ -20,8 +20,13 @@ from pyes.query import FieldQuery, FieldParameter
 from wtf.dates import format_es_date
 from wtf.gravatar import gravatar_image_url
 import wtf
-from wtf.processing import (get_img_size, warp_img, get_warped_img_path,
-                            get_original_path)
+from wtf.processing import (
+    get_img_size,
+    get_original_path,
+    get_warped_img_path,
+    save_normalized,
+    warp_img,
+)
 
 import logging
 log = logging.getLogger(__name__)
@@ -218,8 +223,7 @@ def upload(request):
         if not os.path.exists(pic_dir):
             os.makedirs(pic_dir)
 
-        with open(filename, 'wb') as target:
-            shutil.copyfileobj(pic, target)
+        save_normalized(pic, filename)
 
         pic.close()
 
