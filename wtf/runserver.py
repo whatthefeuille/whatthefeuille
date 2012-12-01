@@ -4,7 +4,7 @@ from wsgiref.simple_server import make_server
 
 from wtf import __version__, logger
 from wtf.web import main as webapp
-from wtf.util import LOG_LEVELS, configure_logger, import_string
+from wtf.util import LOG_LEVELS, configure_logger
 from wtf.config import Config
 
 

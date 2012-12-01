@@ -1,23 +1,15 @@
-import socket
-import urllib
 import os
-import time
 import datetime
-from ConfigParser import NoSectionError
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound
 from pyramid.response import FileResponse
-from pyramid_simpleform import Form
-#from pyramid_simpleform.renderers import FormRenderer
 from pyramid.security import authenticated_userid, forget
 from pyramid.exceptions import Forbidden
 
 from mako.lookup import TemplateLookup
-import paramiko
 
 import wtf
-from wtf.util import generate_key
 
 
 TOPDIR = os.path.dirname(wtf.__file__)
@@ -41,7 +33,6 @@ def index(request):
     return {
             'messages': request.session.pop_flash(),
             'user': authenticated_userid(request)}
-
 
 
 @view_config(route_name='profile', request_method=('GET', 'POST'),

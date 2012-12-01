@@ -1,7 +1,6 @@
 import re
 import os
 from os.path import abspath, normpath, expandvars, expanduser
-import importlib
 from ConfigParser import RawConfigParser
 
 from pyramid.config import Configurator

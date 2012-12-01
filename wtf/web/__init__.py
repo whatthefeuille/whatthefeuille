@@ -1,7 +1,5 @@
 from pyramid.config import Configurator
 from pyramid_beaker import session_factory_from_settings
-from pyramid.authorization import ACLAuthorizationPolicy
-from pyramid.authentication import AuthTktAuthenticationPolicy
 
 
 def main(global_config, **settings):
