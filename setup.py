@@ -6,6 +6,7 @@ from wtf import __version__
 install_requires = [
     'Mako',
     'circus',
+    'python-dateutil==1.5',
     'formencode',
     'paramiko',
     'pyes',
