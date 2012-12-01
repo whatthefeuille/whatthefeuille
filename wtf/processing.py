@@ -69,7 +69,7 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
     # Find the geometric transformation to rotate / rescale the image to have
     # the base under the top vertically aligned and horizontally centered
     warped_base = ((0.5, 0.8) * warped_img_size).astype(np.int)
-    warped_top = ((0.5, 0.2) * warped_img_size).astype(np.int)
+    warped_top = ((0.5, 0.1) * warped_img_size).astype(np.int)
     src = np.array([warped_base, warped_top])
     dst = np.array([base, top])
 
