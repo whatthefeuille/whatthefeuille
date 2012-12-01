@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width">
 
     <script src="/media/js/jquery.js"></script>
+    %if not user:
+    <script src="https://login.persona.org/include.js"></script>
+    %endif
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -32,11 +35,18 @@
               <li><a href="/about">About</a></li>
               <li><a href="/upload">Upload</a></li>
               %if user:
-              <li><a href="/profile">Profile</a></li>
+              <li>
+              <a href="/profile">
+                <img src="${gravatar(user.email)}" width="20" height="20"/>
+                ${user.email}
+              </a>
+              </li>
               <li><a href="/logout">Logout</a></li>
               %endif
               %if not user:
-              <li><a href="/sign" class="sign"><img src="/media/sign_in_blue.png"/></a></li>
+              <li>
+              <img id="signin" src="/media/sign_in_blue.png"/>
+              </li>
               %endif
             </ul>
           </div><!--/.nav-collapse -->
@@ -47,11 +57,11 @@
     <div class="container">
       ${self.body()}
 
-    <hr>
-    <footer>
+      <hr>
+      <footer>
       <p>&copy; Ronan - Olivier - Tarek 2012</p>
       <p>Recognizing your leaves since 2012</p>
-    </footer>
+      </footer>
 
     </div>
     <script src="/media/js/bootstrap-transition.js"></script>
@@ -66,5 +76,30 @@
     <script src="/media/js/bootstrap-collapse.js"></script>
     <script src="/media/js/bootstrap-carousel.js"></script>
     <script src="/media/js/bootstrap-typeahead.js"></script>
-    </body>
+    %if not user:
+    <script>
+      $(function() {
+        $("#signin").click(function() {
+          navigator.id.get(function(assertion) {
+            if (assertion) {
+              var $form = $("<form method=POST "+
+                "      action='/login'>" +
+                "  <input type='hidden' " +
+                "         name='assertion' " +
+                "         value='" + assertion + "' />" +
+                "  <input type='hidden' " +
+                "         name='came_from' "+
+                "         value='${came_from}' />" +
+                "  <input type='hidden' " +
+                "         name='csrf_token' "+
+                "         value='${csrf_token}' />" +
+                "</form>").appendTo($("body"));
+              $form.submit();
+            }
+          });
+        });
+      });
+    </script>
+    %endif
+  </body>
 </html>

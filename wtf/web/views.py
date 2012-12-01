@@ -46,14 +46,30 @@ def time2str(data):
     return datetime.datetime.fromtimestamp(data).strftime('%Y-%m-%d %H:%M:%S')
 
 
+def _basic(request, existing=None):
+    csrf_token = os.urandom(16).encode("hex")
+
+    basic = {'messages': request.session.pop_flash(),
+             'user': request.user,
+             'gravatar': gravatar_image_url,
+             'csrf_token': csrf_token,
+             'came_from': request.path_qs}
+
+    if not request.user:
+        # set up the cookie
+        request.response.set_cookie('browserid_csrf_token', csrf_token)
+
+    if existing is None:
+        return basic
+
+    existing.update(basic)
+    return existing
+
+
 @view_config(route_name='index', request_method='GET', renderer='index.mako')
 def index(request):
     """Index page."""
-
-    return {
-        'messages': request.session.pop_flash(),
-        'user': request.user,
-    }
+    return _basic(request)
 
 
 @view_config(route_name='profile', request_method=('GET', 'POST'),
@@ -65,13 +81,12 @@ def profile(request):
         snaps = request.elasticsearch.search(query, indices=['snaps'])
     else:
         snaps = []
-    return {
-        'user': request.user,
-        'snaps': snaps,
-        'basename': os.path.basename,
-        'gravatar': gravatar_image_url,
-        'format_date': format_es_date,
-    }
+
+    data = {'snaps': snaps,
+            'basename': os.path.basename,
+            'format_date': format_es_date}
+
+    return _basic(request, data)
 
 
 @view_config(route_name='about_index')
@@ -154,11 +169,11 @@ def snapshot(request):
         return HTTPFound(location='/warped/%s' %
                 os.path.basename(warped_image))
 
-    return {'snapshot': filename,
-            'messages': request.session.pop_flash(),
-            'user': request.user,
+    data = {'snapshot': filename,
             'width': width,
             'height': height}
+
+    return _basic(request, data)
 
 
 @view_config(route_name='warped', request_method='GET',
@@ -182,12 +197,12 @@ def warped(request):
         if unsecure in elmts:
             return HTTPNotFound()
 
-    return {'snapshot': filename,
+    data = {'snapshot': filename,
             'original': get_original_path(filename),
-            'messages': request.session.pop_flash(),
-            'user': request.user,
             'width': width,
             'height': height}
+
+    return _basic(request, data)
 
 
 @view_config(route_name='picture')
@@ -231,7 +246,7 @@ def upload(request):
         doc = {
             'user': request.user.id,
             'timestamp': datetime.datetime.utcnow(),
-            'filename': filename,
+            'filename': filename,'gravatar': gravatar_image_url,
         }
         res = request.elasticsearch.index(doc, 'snaps', 'snaptype')
         if not res['ok']:
@@ -242,4 +257,5 @@ def upload(request):
         request.session.flash('Image uploaded')
         return HTTPFound(location='/snapshot/%s' % basename + ext)
 
-    return {'user': request.user}
+    return _basic(request)
+

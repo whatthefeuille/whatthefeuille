@@ -5,11 +5,6 @@
 %endif
 
 %if user:
-
-<img src="${gravatar(user.email)}">
-
-<p>Hello ${user.email}!</p>
-
 <ul class="timeline">
     % for snap in snaps:
     <li>
