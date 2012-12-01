@@ -6,3 +6,4 @@ build
 share
 *.pyc
 *.egg-info
+.DS_Store
