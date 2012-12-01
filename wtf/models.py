@@ -28,6 +28,10 @@ USER_MAPPING = {
         'store': 'yes',
         'index': 'not_analyzed',
     },
+    'registered': {
+        'type': 'date',
+        'store': 'yes',
+    },
 }
 
 

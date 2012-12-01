@@ -2,14 +2,25 @@ import os
 import datetime
 
 from pyramid.view import view_config
-from pyramid.httpexceptions import HTTPFound, HTTPNotFound
+from pyramid.httpexceptions import (
+    HTTPFound,
+    HTTPNotFound,
+    HTTPServerError,
+)
 from pyramid.response import FileResponse
 from pyramid.security import authenticated_userid, forget
 from pyramid.exceptions import Forbidden
 
 from mako.lookup import TemplateLookup
 
+from pyes.query import FieldQuery, FieldParameter
+
+
 import wtf
+
+
+import logging
+log = logging.getLogger(__name__)
 
 
 TOPDIR = os.path.dirname(wtf.__file__)
@@ -65,8 +76,24 @@ def about_dir(request):
 @view_config(route_name='sign')
 def sign(request):
     """Initiates a Browser-ID challenge."""
-    if authenticated_userid(request) is None:
+    email = authenticated_userid(request)
+    if email is None:
         raise Forbidden()
+
+    # Signup new user
+    query = FieldQuery(FieldParameter('email', email))
+    res = request.elasticsearch.search(query)
+    if len(res) == 0:
+        doc = {
+            'email': email,
+            'registered': datetime.datetime.utcnow(),
+        }
+        res = request.elasticsearch.index(doc, 'users', 'usertype')
+        if res['ok'] == False:
+            log.error("Signup failure")
+            log.error(res)
+            raise HTTPServerError()
+
     return HTTPFound(location='/')
 
 
