@@ -15,6 +15,7 @@ install_requires = ['pyramid',
                     'pyramid_macauth',
                     'pyramid_multiauth',
                     'wsgiproxy',
+                    'circus'
                     ]
 
 
