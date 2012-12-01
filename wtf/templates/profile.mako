@@ -5,6 +5,6 @@
 %endif
 
 %if user:
- Salut ${user}
+<p>Hello ${user.email}!</p>
 %endif
 

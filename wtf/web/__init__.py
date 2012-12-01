@@ -1,7 +1,9 @@
 from pyramid.config import Configurator
 from pyramid.decorator import reify
 from pyramid.request import Request as BaseRequest
+from pyramid.security import authenticated_userid
 
+from pyes.query import FieldQuery, FieldParameter
 from pyramid_beaker import session_factory_from_settings
 
 
@@ -17,6 +19,19 @@ class Request(BaseRequest):
         """
         settings = self.registry.settings
         return settings['elasticsearch']
+
+    @reify
+    def user(self):
+        """
+        Get the logged in user
+        """
+        email = authenticated_userid(self)
+        if email is not None:
+            query = FieldQuery(FieldParameter('email', email))
+            res = self.elasticsearch.search(query)
+            if len(res) > 0:
+                return res[0]
+        return None
 
 
 def main(global_config, **settings):

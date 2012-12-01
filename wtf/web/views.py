@@ -42,16 +42,16 @@ def index(request):
     """Index page."""
 
     return {
-            'messages': request.session.pop_flash(),
-            'user': authenticated_userid(request)}
+        'messages': request.session.pop_flash(),
+        'user': request.user,
+    }
 
 
 @view_config(route_name='profile', request_method=('GET', 'POST'),
              renderer='profile.mako')
 def profile(request):
     """Profile page."""
-    user = authenticated_userid(request)
-    return {'user': user}
+    return {'user': request.user}
 
 
 @view_config(route_name='about_index')
