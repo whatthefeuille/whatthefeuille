@@ -1,38 +1,69 @@
 <!doctype html>
 <html>
-<head>
-   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href='/media/wtf.css' rel='stylesheet' type='text/css'/>
+    <link href='/media/bootstrap.css' rel='stylesheet' type='text/css'/>
 
-  <link href='/media/wtf.css' rel='stylesheet' type='text/css'/>
-  <link rel="shortcut icon" href="/media/small-logo.png">
-  <title>What The Feuille</title>
-</head>
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+
+    <link href='/media/bootstrap-responsive.css' rel='stylesheet' type='text/css'/>
+    <link rel="shortcut icon" href="/media/small-logo.png">
+    <title>What The Feuille</title>
+  </head>
   <body>
-    <div id="header">
-        <img src="/media/logo.png"/>
-        <a href="/" id="title">What The Feuille</a>
-        <span id="subtitle">Recognizing your leaves since 2012</span>
-      <div class="login">
-        %if user:
-        Hi <a href="/profile">${user}</a>. <a href="/logout">Logout.</a>
-        %endif
-        %if not user:
-        <a href="/sign"><img src="/media/sign_in_blue.png"/></a>
-      %endif
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">What The Feuille</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="/about">About</a></li>
+              <li><a href="/upload">Upload</a></li>
+              %if user:
+              <li><a href="/profile">Profile</a></li>
+              %endif
+              %if not user:
+              <a href="/sign" class="sign"><img src="/media/sign_in_blue.png"/></a>
+              %endif
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
       </div>
-
-       %if messages:
-         %for message in messages:
-         <div class="message">
-            ${message}
-         </div>
-       %endfor
-     %endif
     </div>
-    <div style="clear:both"></div>
-     <div id="body">
-       ${self.body()}
-   </div>
 
-  </body>
+    <div class="container">
+      ${self.body()}
+
+    <hr>
+    <footer>
+      <p>&copy; Ronan - Olivier - Tarek 2012</p>
+      <p>Recognizing your leaves since 2012</p>
+    </footer>
+
+    </div>
+    <script src="/media/js/jquery.js"></script>
+    <script src="/media/js/bootstrap-transition.js"></script>
+    <script src="/media/js/bootstrap-alert.js"></script>
+    <script src="/media/js/bootstrap-modal.js"></script>
+    <script src="/media/js/bootstrap-dropdown.js"></script>
+    <script src="/media/js/bootstrap-scrollspy.js"></script>
+    <script src="/media/js/bootstrap-tab.js"></script>
+    <script src="/media/js/bootstrap-tooltip.js"></script>
+    <script src="/media/js/bootstrap-popover.js"></script>
+    <script src="/media/js/bootstrap-button.js"></script>
+    <script src="/media/js/bootstrap-collapse.js"></script>
+    <script src="/media/js/bootstrap-carousel.js"></script>
+    <script src="/media/js/bootstrap-typeahead.js"></script>
+    </body>
 </html>
