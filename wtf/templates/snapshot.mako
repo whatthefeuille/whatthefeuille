@@ -1,6 +1,7 @@
 <%inherit file="base.mako"/>
 
-<h3 id="step">Select the top of the leaf</h3>
+<h3>Step 1/3 - Align your leaf!</h3>
+<p id="step">Select the top of the leaf</p>
 
 <form name="pointform" method="post" action="/snapshot/${snapshot}">
   <div id="pointer_div" style =
@@ -16,7 +17,7 @@ style="position:absolute"></img>
 <input type="hidden" id="bottom_x" name="bottom_x" />
 <input type="hidden" id="bottom_y" name="bottom_y" />
 
-<input type="submit"/>
+<input type="submit" value="Looks good! " name='ok'/>
 </form>
 
 <script src="/media/js/wtf.js"></script>
