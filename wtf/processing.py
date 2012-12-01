@@ -27,7 +27,9 @@ def get_warped_img_path(raw_img_path):
 def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
     """Rotate and rescale to normalize the position of base and top points
 
-    Return the file system path of the transformed image.
+    Return the file system path of the transformed image and the transformed
+    base and top positions in the new image.
+
     """
     # Check the expected size of the resulting file
     warped_img_size = np.array(warped_img_size)
@@ -58,9 +60,9 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
 
     # Find the geometric transformation to rotate / rescale the image to have
     # the base under the top vertically aligned and horizontally centered
-    expected_base = ((0.5, 0.8) * warped_img_size).astype(np.int)
-    expected_top = ((0.5, 0.2) * warped_img_size).astype(np.int)
-    src = np.array([expected_base, expected_top])
+    warped_base = ((0.5, 0.8) * warped_img_size).astype(np.int)
+    warped_top = ((0.5, 0.2) * warped_img_size).astype(np.int)
+    src = np.array([warped_base, warped_top])
     dst = np.array([base, top])
 
     # Perform the transformation
@@ -70,4 +72,4 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
     # Save the result back on the harddrive
     warped_path = get_warped_img_path(raw_img_path)
     imsave(warped_path, warped)
-    return warped_path
+    return warped_path, tuple(warped_base), tuple(warped_top)

@@ -41,7 +41,9 @@ def test_warp_img():
 
     base = (300, 200)
     top = (100, 200)
-    warped_path = warp_img(IMG_PATH, base, top)
+    warped_path, warped_base, warped_top = warp_img(IMG_PATH, base, top)
 
     assert_equals(warped_path, expected_warped_path)
+    assert_equals(warped_base, (250, 400))
+    assert_equals(warped_top, (250, 100))
     assert_true(os.path.exists(warped_path))
