@@ -20,8 +20,8 @@ from pyes.query import FieldQuery, FieldParameter
 from wtf.dates import format_es_date
 from wtf.gravatar import gravatar_image_url
 import wtf
-from wtf.processing import get_img_size, warp_img, get_warped_img_path
-
+from wtf.processing import (get_img_size, warp_img, get_warped_img_path,
+                            get_original_path)
 
 import logging
 log = logging.getLogger(__name__)
@@ -150,20 +150,43 @@ def snapshot(request):
         base = _toint(request.POST['bottom_x']), _toint(request.POST['bottom_y'])
         top = _toint(request.POST['top_x']), _toint(request.POST['top_y'])
         warped_image, new_base, new_top = warp_img(orig_img, base, top)
-    else:
-        warped_image = get_warped_img_path(orig_img)
-        if not os.path.exists(warped_image):
-            warped_image = None
-
-    if warped_image is not None:
-        warped_image = os.path.basename(warped_image)
+        return HTTPFound(location='/warped/%s' %
+                os.path.basename(warped_image))
 
     return {'snapshot': filename,
             'messages': request.session.pop_flash(),
             'user': request.user,
             'width': width,
-            'height': height,
-            'warped_image': warped_image}
+            'height': height}
+
+
+@view_config(route_name='warped', request_method='GET',
+             renderer='warped.mako')
+def warped(request):
+    """Index page."""
+    filename = request.matchdict['file']
+    settings = dict(request.registry.settings)
+    pic_dir = settings['thumbs.document_root']
+    orig_img = os.path.join(pic_dir, filename)
+    res = get_img_size(orig_img)
+
+    if len(res) == 2:
+        height, width = res
+    else:
+        height, width = 500, 500
+
+    # security loop
+    elmts = filename.split(os.sep)
+    for unsecure in ('.', '..'):
+        if unsecure in elmts:
+            return HTTPNotFound()
+
+    return {'snapshot': filename,
+            'original': get_original_path(filename),
+            'messages': request.session.pop_flash(),
+            'user': request.user,
+            'width': width,
+            'height': height}
 
 
 @view_config(route_name='picture')

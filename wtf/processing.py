@@ -14,6 +14,15 @@ def get_img_size(img_path):
     return imread(img_path).shape[:2]
 
 
+def get_original_path(warped_img):
+    """Find the expected file location of an image from the warped"""
+    img_folder = os.path.dirname(warped_img)
+    base_name = os.path.basename(warped_img)
+    img_id, img_ext = os.path.splitext(base_name)
+    img_name = img_id[:-len("_warped")] + img_ext
+    return os.path.join(img_folder, img_name)
+
+
 def get_warped_img_path(raw_img_path):
     """Find the expected file location of a warped image from the source"""
     img_folder = os.path.dirname(raw_img_path)

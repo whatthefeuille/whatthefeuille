@@ -4,18 +4,12 @@
 
 <form name="pointform" method="post" action="/snapshot/${snapshot}">
   <div id="pointer_div" style =
-"background-image:url('/picture/${snapshot}');width:${width}px;height:${height}px;position:relative;float:left">
+"background-image:url('/picture/${snapshot}');width:${width}px;height:${height}px;position:relative">
     <img src="/media/top.gif" id="topcross" style="position:absolute"></img>
     <img src="/media/bottom.gif" id="bottomcross"
 style="position:absolute"></img>
 
   </div>
-<div style="float:left">
-%if warped_image:
- <img src="/picture/${warped_image}"/>
-%endif
-</div>
-<div style="clear:both"/>
 
 <input type="hidden" id="top_x" name="top_x" />
 <input type="hidden" id="top_y" name="top_y"  />
