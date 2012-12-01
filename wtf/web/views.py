@@ -1,5 +1,7 @@
+import shutil
 import os
 import datetime
+from uuid import uuid4
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
@@ -103,3 +105,60 @@ def logout(request):
     headers = forget(request)
     request.session.flash("Logged out")
     return HTTPFound(location='/', headers=headers)
+
+
+@view_config(route_name='snapshot', request_method='GET',
+             renderer='snapshot.mako')
+def snapshot(request):
+    """Index page."""
+    filename = request.matchdict['file']
+    elmts = filename.split(os.sep)
+    for unsecure in ('.', '..'):
+        if unsecure in elmts:
+            return HTTPNotFound()
+
+    return {'snapshot': filename,
+            'messages': request.session.pop_flash(),
+            'user': authenticated_userid(request)}
+
+
+@view_config(route_name='picture')
+def picture(request):
+    settings = dict(request.registry.settings)
+    pic_dir = settings['thumbs.document_root']
+
+    filename = request.matchdict['file']
+    elmts = filename.split(os.sep)
+    for unsecure in ('.', '..'):
+        if unsecure in elmts:
+            return HTTPNotFound()
+
+    path = os.path.join(pic_dir, filename)
+    return FileResponse(path, request)
+
+
+@view_config(route_name='upload', request_method=('GET', 'POST'),
+             renderer='upload.mako')
+def upload(request):
+    """Profile page."""
+    if authenticated_userid(request) is None:
+        raise Forbidden()
+
+    if 'picture' in request.POST:
+        pic = request.POST['picture'].file
+        ext = os.path.splitext(request.POST['picture'].filename)[-1]
+        settings = dict(request.registry.settings)
+        pic_dir = settings['thumbs.document_root']
+        basename = str(uuid4())
+        filename = os.path.join(pic_dir, basename + ext)
+
+        with open(filename, 'wb') as target:
+            shutil.copyfileobj(pic, target)
+
+        pic.close()
+
+        request.session.flash('Image uploaded')
+        return HTTPFound(location='/snapshot/%s' % basename + ext)
+
+    user = authenticated_userid(request)
+    return {'user': user}
