@@ -20,7 +20,7 @@ from pyes.query import FieldQuery, FieldParameter
 from wtf.dates import format_es_date
 from wtf.gravatar import gravatar_image_url
 import wtf
-from wtf.processing import get_img_size
+from wtf.processing import get_img_size, warp_img, get_warped_img_path
 
 
 import logging
@@ -121,31 +121,49 @@ def logout(request):
     return HTTPFound(location='/', headers=headers)
 
 
-@view_config(route_name='snapshot', request_method='GET',
+def _toint(value):
+    return int(float(value))
+
+
+@view_config(route_name='snapshot', request_method=('GET', 'POST'),
              renderer='snapshot.mako')
 def snapshot(request):
     """Index page."""
     filename = request.matchdict['file']
     settings = dict(request.registry.settings)
     pic_dir = settings['thumbs.document_root']
+    orig_img = os.path.join(pic_dir, filename)
+    res = get_img_size(orig_img)
 
-    res = get_img_size(os.path.join(pic_dir, filename))
     if len(res) == 2:
-        width, height = res
+        height, width = res
     else:
-        width, height = 500, 500
+        height, width = 500, 500
 
-
+    # security loop
     elmts = filename.split(os.sep)
     for unsecure in ('.', '..'):
         if unsecure in elmts:
             return HTTPNotFound()
 
+    if request.method == 'POST':
+        base = _toint(request.POST['bottom_x']), _toint(request.POST['bottom_y'])
+        top = _toint(request.POST['top_x']), _toint(request.POST['top_y'])
+        warped_image, new_base, new_top = warp_img(orig_img, base, top)
+    else:
+        warped_image = get_warped_img_path(orig_img)
+        if not os.path.exists(warped_image):
+            warped_image = None
+
+    if warped_image is not None:
+        warped_image = os.path.basename(warped_image)
+
     return {'snapshot': filename,
             'messages': request.session.pop_flash(),
             'user': request.user,
             'width': width,
-            'height': height}
+            'height': height,
+            'warped_image': warped_image}
 
 
 @view_config(route_name='picture')

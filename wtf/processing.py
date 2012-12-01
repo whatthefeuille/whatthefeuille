@@ -47,7 +47,6 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
     img_max = np.max(img.shape[:2])
     twice = img_max * 2
     img_square = np.zeros(shape=(twice, twice, img.shape[2]), dtype=img.dtype)
-
     img_center = (top + base) / 2
     offset = np.array(img_square.shape[:2]) / 2 - img_center
     base += offset
