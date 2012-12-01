@@ -4,6 +4,7 @@ import tempfile
 from nose.tools import assert_equals
 from nose.tools import assert_true
 
+from wtf.processing import get_img_size
 from wtf.processing import get_warped_img_path
 from wtf.processing import warp_img
 

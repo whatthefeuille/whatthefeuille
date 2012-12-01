@@ -9,6 +9,11 @@ from skimage.io import imsave
 WARPED_IMG_SIZE = (500, 500)
 
 
+def get_img_size(img_path):
+    """Return the width and height of the image file"""
+    return imread(img_path).shape[:2]
+
+
 def get_warped_img_path(raw_img_path):
     """Find the expected file location of a warped image from the source"""
     img_folder = os.path.dirname(raw_img_path)
