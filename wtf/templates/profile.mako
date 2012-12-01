@@ -6,5 +6,12 @@
 
 %if user:
 <p>Hello ${user.email}!</p>
-%endif
 
+<ul>
+    % for snap in snaps:
+    <li>
+        <img src="/thumb/small/${basename(snap.filename)}">
+    </li>
+    % endfor
+</ul>
+%endif

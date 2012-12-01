@@ -23,6 +23,11 @@ def includeme(config):
 
 
 USER_MAPPING = {
+    'id': {
+        'type': 'string',
+        'store': 'yes',
+        'index': 'not_analyzed',
+    },
     'email': {
         'type': 'string',
         'store': 'yes',
@@ -36,6 +41,11 @@ USER_MAPPING = {
 
 
 PLANT_MAPPING = {
+    'id': {
+        'type': 'string',
+        'store': 'yes',
+        'index': 'not_analyzed',
+    },
     'name': {
         'type': 'string',
         'store': 'yes',
@@ -63,7 +73,7 @@ PLANT_MAPPING = {
 
 SNAP_MAPPING = {
     'user': {
-        'type': 'integer',
+        'type': 'string',
     },
     'timestamp': {
         'type': 'date',
@@ -95,7 +105,7 @@ SNAP_MAPPING = {
         'type': 'integer',
     },
     'plant': {
-        'type': 'integer',
+        'type': 'string',
     },
 }
 

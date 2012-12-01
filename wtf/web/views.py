@@ -53,7 +53,13 @@ def index(request):
              renderer='profile.mako')
 def profile(request):
     """Profile page."""
-    return {'user': request.user}
+    query = FieldQuery(FieldParameter('user', request.user.id))
+    snaps = request.elasticsearch.search(query, indices=['snaps'])
+    return {
+        'basename': os.path.basename,
+        'user': request.user,
+        'snaps': snaps,
+    }
 
 
 @view_config(route_name='about_index')
@@ -87,6 +93,7 @@ def sign(request):
     res = request.elasticsearch.search(query)
     if len(res) == 0:
         doc = {
+            'id': str(uuid4()),
             'email': email,
             'registered': datetime.datetime.utcnow(),
         }
@@ -159,6 +166,18 @@ def upload(request):
             shutil.copyfileobj(pic, target)
 
         pic.close()
+
+        # Add to Elastic Search
+        doc = {
+            'user': request.user.id,
+            'timestamp': datetime.datetime.utcnow(),
+            'filename': filename,
+        }
+        res = request.elasticsearch.index(doc, 'snaps', 'snaptype')
+        if not res['ok']:
+            log.error("Error while saving snap")
+            log.error(res)
+            raise HTTPServerError()
 
         request.session.flash('Image uploaded')
         return HTTPFound(location='/snapshot/%s' % basename + ext)
