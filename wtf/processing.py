@@ -10,7 +10,7 @@ WARPED_IMG_SIZE = (500, 500)
 
 
 def get_img_size(img_path):
-    """Return the width and height of the image file"""
+    """Return the (width, height) size tuple of the image file"""
     return imread(img_path).shape[:2]
 
 
