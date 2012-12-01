@@ -4,7 +4,7 @@
 <p id="step">Select the top of the leaf</p>
 
 <form name="pointform" method="post" action="/snapshot/${snapshot}">
-    <div class="snapshot" id="pointer_div" style="background-image: url('/picture/${snapshot}'); width: ${width}px; height:${height}px">
+    <div class="snapshot" id="pointer_div" style="background-image: url('/picture/${snapshot}'); width: ${width}px; height:${height}px" title="Select the top of the leaf">
         <img src="/media/top.gif" id="topcross">
         <img src="/media/bottom.gif" id="bottomcross">
     </div>
@@ -25,6 +25,7 @@
 
 <script>
 $(document).ready(function() {
+   $('input[type="submit"]').attr('disabled', 'disabled');
    $('#topcross').hide();
    $('#bottomcross').hide();
 });
