@@ -19,7 +19,11 @@ install_requires = [
     'virtualenv', 'Sphinx',
     'wsgiproxy',
     'wsgithumb',
-    'PIL'
+    'PIL',
+    'cython',
+    'numpy',
+    'scikit-image',
+    'scipy'
 ]
 
 

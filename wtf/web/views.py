@@ -19,6 +19,7 @@ from pyes.query import FieldQuery, FieldParameter
 
 from wtf.gravatar import gravatar_image_url
 import wtf
+from wtf.processing import get_img_size
 
 
 import logging
@@ -120,6 +121,16 @@ def logout(request):
 def snapshot(request):
     """Index page."""
     filename = request.matchdict['file']
+    settings = dict(request.registry.settings)
+    pic_dir = settings['thumbs.document_root']
+
+    res = get_img_size(os.path.join(pic_dir, filename))
+    if len(res) == 2:
+        width, height = res
+    else:
+        width, height = 500, 500
+
+
     elmts = filename.split(os.sep)
     for unsecure in ('.', '..'):
         if unsecure in elmts:
@@ -127,7 +138,9 @@ def snapshot(request):
 
     return {'snapshot': filename,
             'messages': request.session.pop_flash(),
-            'user': request.user}
+            'user': request.user,
+            'width': width,
+            'height': height}
 
 
 @view_config(route_name='picture')
