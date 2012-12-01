@@ -1,5 +1,19 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #F7F7F7;
+    background-image: url("/media/lightpaperfibers.png");
+}
+
 .sign img {
     margin-top: 1px;
+}
+
+.snapshot img {
+    border-radius: 6px;
+    box-shadow: 1px 1px #AA9;
 }
 
 .timeline {
@@ -8,5 +22,34 @@
 }
 
 .timeline li {
+    display: inline-block;
+    border-radius: 5px;
+    margin-right: 12px;
     margin-bottom: 1em;
+    background-color: #FFF;
+    box-shadow: 1px 1px #AA9;
 }
+
+.timeline li .image {
+    display: block;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    background-position: center;
+    background-size: cover;
+    width: 272px;
+    height: 180px;
+}
+
+.timeline li .bar {
+    padding: 6px 12px;
+    border-left: thin solid #CCB;
+    border-right: thin solid #CCB;
+    border-bottom: thin solid #CCB;
+}
+
+.timeline li .bar .date {
+    color: #888;
+    text-align: right;
+    font-size: 90%;
+}
+

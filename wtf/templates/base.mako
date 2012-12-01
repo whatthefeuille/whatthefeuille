@@ -4,6 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <link href='/media/wtf.css' rel='stylesheet' type='text/css'/>
     <link href='/media/bootstrap.css' rel='stylesheet' type='text/css'/>
+    <meta name="viewport" content="width=device-width">
 
     <script src="/media/js/jquery.js"></script>
     <style>

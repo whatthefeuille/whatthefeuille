@@ -17,6 +17,7 @@ from mako.lookup import TemplateLookup
 
 from pyes.query import FieldQuery, FieldParameter
 
+from wtf.dates import format_es_date
 from wtf.gravatar import gravatar_image_url
 import wtf
 from wtf.processing import get_img_size
@@ -54,13 +55,17 @@ def index(request):
              renderer='profile.mako')
 def profile(request):
     """Profile page."""
-    query = FieldQuery(FieldParameter('user', request.user.id))
-    snaps = request.elasticsearch.search(query, indices=['snaps'])
+    if request.user:
+        query = FieldQuery(FieldParameter('user', request.user.id))
+        snaps = request.elasticsearch.search(query, indices=['snaps'])
+    else:
+        snaps = []
     return {
-        'basename': os.path.basename,
         'user': request.user,
-        'user_profile_picture': gravatar_image_url(request.user.email),
         'snaps': snaps,
+        'basename': os.path.basename,
+        'gravatar': gravatar_image_url,
+        'format_date': format_es_date,
     }
 
 

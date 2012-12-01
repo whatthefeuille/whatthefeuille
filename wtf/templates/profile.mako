@@ -6,16 +6,18 @@
 
 %if user:
 
-<img src="${user_profile_picture}">
+<img src="${gravatar(user.email)}">
 
 <p>Hello ${user.email}!</p>
 
 <ul class="timeline">
     % for snap in snaps:
     <li>
-        <a href="/snapshot/${basename(snap.filename)}">
-            <img src="/thumbs/thumb/${basename(snap.filename)}">
+        <a class="image" href="/snapshot/${basename(snap.filename)}" style="background-image: url('/thumbs/large/${basename(snap.filename)}')">
         </a>
+        <div class="bar">
+            <div class="date">Posted on ${format_date(snap.timestamp)}</div>
+        </div>
     </li>
     % endfor
 </ul>

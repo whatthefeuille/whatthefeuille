@@ -1,8 +1,8 @@
 <%inherit file="base.mako"/>
 
+<h3 id="step">Select the top of the leaf</h3>
 
-<h3 id="step">Select the top of the leaf</h1>
-<form name="pointform" method="post" action="/snapshot/${snapshot}">
+<form name="pointform" method="post" action="/snapshot/${snapshot}" class="snapshot">
   <div id="pointer_div" style = "background-image:url('/picture/${snapshot}');width:${width}px;height:${height}px;position:relative">
     <img src="/media/top.gif" id="topcross" style="position:absolute"></img>
     <img src="/media/bottom.gif" id="bottomcross" 
@@ -26,4 +26,3 @@ $(document).ready(function() {
 
  });
 </script>
-
