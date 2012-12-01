@@ -133,12 +133,8 @@ def snapshot(request):
     settings = dict(request.registry.settings)
     pic_dir = settings['thumbs.document_root']
     orig_img = os.path.join(pic_dir, filename)
-    res = get_img_size(orig_img)
 
-    if len(res) == 2:
-        height, width = res
-    else:
-        height, width = 500, 500
+    height, width = get_img_size(orig_img)
 
     # security loop
     elmts = filename.split(os.sep)
