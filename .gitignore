@@ -8,5 +8,7 @@ share
 *.egg-info
 .DS_Store
 .*~
-
 *_warped.jpeg
+wtf/cache
+wtf/data
+wtf/images
