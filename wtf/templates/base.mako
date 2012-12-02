@@ -31,16 +31,24 @@
             <ul class="nav">
               <li><a href="/plant">Plantopedia</a></li>
               <li><a href="/upload">Upload Snapshot</a></li>
-              %if user:
-              <li>
-              <a href="/profile">
-                <img src="${gravatar(user.email)}" width="20" height="20"/>
-                ${user.email}
-              </a>
-              </li>
-              <li><a href="/logout">Logout</a></li>
-              %endif
               <li><a href="/about">About</a></li>
+            </ul>
+            <ul class="nav pull-right">
+                %if user:
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <img src="${gravatar(user.email)}" width="20" height="20"/>
+                        ${user.email}
+                        <b class="caret"></b>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="/profile">My snapshots</a>
+                        </li>
+                        <li>
+                            <a href="/logout">Logout</a>
+                        </li>
+                    </ul>
+                %endif
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -61,8 +69,7 @@
 
       <hr>
       <footer>
-        <p>&copy; Tarek, Olivier &amp; Ronan &mdash; Recognizing your leaves since 2012
-      </p>
+        <p>&copy; Tarek, Olivier &amp; Ronan &mdash; Recognizing your leaves since 2012</p>
       </footer>
 
     </div>
