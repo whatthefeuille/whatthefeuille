@@ -81,7 +81,6 @@ def plants(request):
     snaps = request.elasticsearch.search(query, size=10, indices=['plants'],
                                          )
     data = {'plants': snaps,
-            'basename': os.path.basename,
             'format_date': format_es_date}
 
     return _basic(request, data)
@@ -91,23 +90,24 @@ def plants(request):
              renderer='plant.mako')
 def plant(request):
     """Plant page."""
-    name = request.matchdict['file']
+    filename = request.matchdict['file']
+    name = os.path.basename(filename)
     query = FieldQuery(FieldParameter('plant', name))
     snaps = request.elasticsearch.search(query, size=10, indices=['snaps'])
 
+    # TODO: we should use plant id here instead
     query = FieldQuery(FieldParameter('name', name))
     plant = list(request.elasticsearch.search(query, indices=['plants']))[0]
 
     filename = plant.get('filename')
     if filename:
-        image = '/thumbs/large/' + os.path.basename(filename)
+        image = '/thumbs/large/' + filename
     else:
         image = '/media/tree_icon.png'
 
     data = {'name': name,
             'image': image,
             'snaps': snaps,
-            'basename': os.path.basename,
             'format_date': format_es_date}
 
     return _basic(request, data)
@@ -120,7 +120,6 @@ def index(request):
     snaps = request.elasticsearch.search(query, size=10, indices=['snaps'])
 
     data = {'snaps': snaps,
-            'basename': os.path.basename,
             'format_date': format_es_date}
 
     return _basic(request, data)
@@ -137,7 +136,6 @@ def profile(request):
         snaps = []
 
     data = {'snaps': snaps,
-            'basename': os.path.basename,
             'format_date': format_es_date}
 
     return _basic(request, data)
@@ -159,7 +157,7 @@ def sign(request):
             'email': email,
             'registered': datetime.datetime.utcnow(),
         }
-        res = request.elasticsearch.index(doc, 'users', 'usertype')
+        res = request.elasticsearch.index(doc, 'users', 'usertype', doc['id'])
         if res['ok'] == False:
             logger.error("Signup failure")
             logger.error(res)
@@ -188,9 +186,9 @@ def snapshot(request):
     filename = request.matchdict['file']
     settings = dict(request.registry.settings)
     pic_dir = settings['thumbs.document_root']
-    orig_img = os.path.join(pic_dir, filename)
+    file_path = os.path.join(pic_dir, filename)
 
-    height, width = get_img_size(orig_img)
+    height, width = get_img_size(file_path)
 
     # security loop
     elmts = filename.split(os.sep)
@@ -198,32 +196,31 @@ def snapshot(request):
         if unsecure in elmts:
             return HTTPNotFound()
 
+    file_uuid = os.path.splitext(filename)[0]
+
     if request.method == 'POST':
         base = _toint(request.POST['bottom_y']), _toint(request.POST['bottom_x'])
         top = _toint(request.POST['top_y']), _toint(request.POST['top_x'])
-        query = FieldQuery(FieldParameter('filename', orig_img))
-        warped_image, new_base, new_top = warp_img(orig_img, base, top)
+        warped_img_path, new_base, new_top = warp_img(file_path, base, top)
         # There should be only one
-        snap_idx = 'snaps'
-        snaps = request.elasticsearch.search(query, size=2, indices=[snap_idx])
-        if len(snaps) > 1:
-            logger.warning("Found more than one snapshot for file %s", filename)
-        elif len(snaps) >= 1:
-            snap = snaps[0]
-            snap['warped_filename'] = warped_image
+        snap_idx, snap_type = 'snaps', 'snaptype'
+        snap = request.elasticsearch.get(snap_idx, snap_type, file_uuid)
+        warped_filename = os.path.basename(warped_img_path)
+        if snap is not None:
+            snap['warped_filename'] = warped_filename
             snap['warped'] = True
             snap['base_x'] = base[0]
             snap['base_y'] = base[1]
             snap['top_x'] = top[0]
             snap['top_y'] = top[1]
-            request.elasticsearch.index(snap, snap_idx, 'snaptype')
+            logger.debug("Updating snap %s: %r", file_uuid, snap)
+            request.elasticsearch.index(snap, snap_idx, snap_type, file_uuid)
             request.elasticsearch.refresh()
             # TODO: compute features here
-            FEATURES_CACHE[warped_image] = 'FEATURES'
+            FEATURES_CACHE[warped_filename] = 'FEATURES'
         else:
-            logger.warning("Could not find snap for %s", orig_img)
-        return HTTPFound(location='/warped/%s' %
-                os.path.basename(warped_image))
+            logger.warning("Could not find snap for %s", file_uuid)
+        return HTTPFound(location='/warped/%s' % warped_filename)
 
     data = {'snapshot': filename,
             'width': width,
@@ -286,60 +283,59 @@ def upload(request):
              renderer='upload_plant.mako')
 def upload_plant(request):
     index, type_, root = 'plants', 'planttype', 'plant'
-    ext = ''
 
     if request.user is None:
         raise Forbidden()
 
     if request.method == 'POST':
         pic = request.POST.get('picture')
-        basename = request.POST.get('name', str(uuid4()))
+        name = request.POST.get('name', str(uuid4()))
 
         if pic not in (None, ''):
-            filename, __ = _save_pic(pic, request, basename)
+            name, ext = _save_pic(pic, request, name)
         else:
-            filename = None
+            ext = '.bin'
 
         # Add to Elastic Search
         doc = {
             'user': request.user.id,
             'timestamp': datetime.datetime.utcnow(),
-            'filename': filename,
+            'filename': name + ext,
             'gravatar': gravatar_image_url(request.user.email),
             'geo_longitude': request.POST.get('longitude'),
             'geo_latitude': request.POST.get('latitude'),
             'geo_accuracy': request.POST.get('accuracy'),
-            'name': request.POST.get('name')
+            'name': name,
         }
-
-        res = request.elasticsearch.index(doc, index, type_)
+        res = request.elasticsearch.index(doc, index, type_, name)
         if not res['ok']:
             logger.error("Error while saving index")
             logger.error(res)
             raise HTTPServerError()
-
         request.elasticsearch.refresh()
-        request.session.flash('Image uploaded')
-        return HTTPFound(location='/%s/%s' % (root, basename + ext))
+        request.session.flash('Plant registered')
+        return HTTPFound(location='/%s/%s' % (root, name))
 
     return _basic(request)
 
 @view_config(route_name='upload_plant_snaps', request_method='POST')
 def upload_plant_snaps(request):
-    plantname = request.POST['name']
+    plant_name = request.POST['name']
     uploaded = 0
     for name, value in request.POST.items():
         if name == 'name':
             continue
-
-        filename, ext = _save_pic(value, request)
+        if value == u'':
+            continue
+        logger.debug('Saving snap %r for plant %s', value, plant_name)
+        file_uuid, ext = _save_pic(value, request)
         doc = {
-            'user': request.user.id,
+           'user': request.user.id,
            'timestamp': datetime.datetime.utcnow(),
-           'filename': filename,
-           'plant': plantname
+           'filename': file_uuid + ext,
+           'plant': plant_name,
         }
-        res = request.elasticsearch.index(doc, 'snaps', 'snaptype')
+        res = request.elasticsearch.index(doc, 'snaps', 'snaptype', file_uuid)
         if not res['ok']:
             logger.error("Error while saving index")
             logger.error(res)
@@ -348,22 +344,22 @@ def upload_plant_snaps(request):
 
     request.elasticsearch.refresh()
     request.session.flash("Uploaded %d snaps" % uploaded)
-    return HTTPFound(location='/plant/%s' % plantname)
+    return HTTPFound(location='/plant/%s' % plant_name)
 
 
-def _save_pic(fileupload, request, basename=None):
-    if basename is None:
-        basename = str(uuid4())
+def _save_pic(fileupload, request, file_uuid=None):
+    if file_uuid is None:
+        file_uuid = str(uuid4())
     pic = fileupload.file
     ext = os.path.splitext(fileupload.filename)[-1]
     settings = dict(request.registry.settings)
     pic_dir = settings['thumbs.document_root']
-    filename = os.path.join(pic_dir, basename + ext)
+    filepath = os.path.join(pic_dir, file_uuid + ext)
     if not os.path.exists(pic_dir):
-	os.makedirs(pic_dir)
-    save_normalized(pic, filename)
+        os.makedirs(pic_dir)
+    save_normalized(pic, filepath)
     pic.close()
-    return filename, ext
+    return file_uuid, ext
 
 
 def _upload(request, index, type_, root):
@@ -372,19 +368,17 @@ def _upload(request, index, type_, root):
 
     if request.method == 'POST':
         pic = request.POST.get('picture')
-        basename = request.POST.get('name', str(uuid4()))
-
+        file_uuid = request.POST.get('name', str(uuid4()))
         if pic is not None:
-            filename, ext = _save_pic(pic, request, basename)
+            file_uuid, ext = _save_pic(pic, request, file_uuid)
         else:
-            filename = None
-            ext = ''
+            ext = '.bin'
 
         # Add to Elastic Search
         doc = {
             'user': request.user.id,
             'timestamp': datetime.datetime.utcnow(),
-            'filename': filename,
+            'filename': file_uuid + ext,
             'gravatar': gravatar_image_url(request.user.email),
             'geo_longitude': request.POST.get('longitude'),
             'geo_latitude': request.POST.get('latitude'),
@@ -392,14 +386,15 @@ def _upload(request, index, type_, root):
             'name': request.POST.get('name')
         }
 
-        res = request.elasticsearch.index(doc, index, type_)
+        res = request.elasticsearch.index(doc, index, type_, file_uuid)
         if not res['ok']:
-            logger.error("Error while saving index")
+            logger.error("Error while saving index %r for %r",
+                         index, file_uuid)
             logger.error(res)
             raise HTTPServerError()
 
         request.elasticsearch.refresh()
         request.session.flash('Image uploaded')
-        return HTTPFound(location='/%s/%s' % (root, basename + ext))
+        return HTTPFound(location='/%s/%s' % (root, file_uuid + ext))
 
     return _basic(request)
