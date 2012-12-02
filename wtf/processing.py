@@ -5,6 +5,7 @@ from skimage.io import imread
 from skimage.io import imsave
 from skimage.feature import hog
 from skimage import color
+from sklearn.metrics.pairwise import pairwise_distances
 
 from PIL import Image
 
@@ -171,12 +172,14 @@ def compute_features_collection(snaps, pic_dir, cache=None):
     if cache is None:
         cache = {}
 
+    snaps_with_features = []
     features_list = []
     for snap in snaps:
         snap_id = snap.file_uuid
         features = cache.get(snap_id)
         if features is not None:
-            features_list.append((snap_id, features))
+            snaps_with_features.append(snap)
+            features_list.append(features)
             continue
 
         # Compute the features
@@ -186,6 +189,41 @@ def compute_features_collection(snaps, pic_dir, cache=None):
             continue
 
         warped_file_path = os.path.join(pic_dir, snap.warped_filename)
-        features_list.append(snap_id, compute_features(warped_file_path))
+        new_features = compute_features(warped_file_path)
+        cache[snap_id] = new_features
+        snaps_with_features.append(snap)
+        features_list.append(new_features)
 
-    return features_list
+    return snaps_with_features, features_list
+
+
+def suggest_snaps(query_snap, other_snaps, pic_dir, cache=None,
+                  criterion='euclidean_distance'):
+    """Order snaps by similarity with the reference query"""
+    if cache is None:
+        cache = {}
+
+    if not query_snap.warped:
+        raise ValueError()
+    query_features = cache.get(query_snap.file_uuid)
+    if query_features is None:
+        query_warped_file_path = os.path.join(
+            pic_dir, query_snap.warped_filename)
+        query_features = compute_features(query_warped_file_path)
+        cache[query_snap.file_uuid] = query_features
+
+    snaps, features = compute_features_collection(
+        other_snaps, pic_dir, cache=cache)
+    snaps = np.array(snaps)
+
+    if criterion == 'euclidean_distance':
+        scores = pairwise_distances([query_features], features).ravel()
+        minimize = True
+    else:
+        raise NotImplementedError('criterion: ' + criterion)
+
+    if minimize:
+        ordering = np.argsort(scores)[::-1]
+    else:
+        ordering = np.argsort(scores)
+    return snaps[ordering]
