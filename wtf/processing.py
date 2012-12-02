@@ -20,10 +20,11 @@ def save_normalized(fileobj, filename):
     image.thumbnail(WARPED_IMG_SIZE, Image.ANTIALIAS)
 
     # Flip / rotate image based on EXIF orientation flag
-    orientation = image._getexif().get(EXIF_TAG_ORIENTATION, None)
-    if orientation == 1:
-        pass
-    elif orientation == 2:
+    exif = image._getexif()
+    orientation = None if exif is None else exif.get(
+        EXIF_TAG_ORIENTATION, None)
+
+    if orientation == 2:
         image = image.transpose(Image.FLIP_LEFT_RIGHT)
     elif orientation == 3:
         image = image.transpose(Image.ROTATE_180)
