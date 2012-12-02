@@ -79,7 +79,7 @@ def plants(request):
     """Plants page."""
     query = StringQuery('*')
     snaps = request.db.search(query, size=10, indices=['plants'],
-                                         )
+                              sort='name')
     data = {'plants': snaps,
             'format_date': format_es_date}
 
@@ -92,7 +92,8 @@ def plant(request):
     """Plant page."""
     name = request.matchdict['name']
     query = FieldQuery(FieldParameter('plant', name))
-    snaps = request.db.search(query, size=10, indices=['snaps'])
+    snaps = request.db.search(query, size=10, indices=['snaps'],
+                              sort='timestamp')
 
     # TODO: we should use plant id here instead
     query = FieldQuery(FieldParameter('name', name))
@@ -119,7 +120,8 @@ def plant(request):
 def index(request):
     """Index page."""
     query = StringQuery('*')
-    snaps = request.db.search(query, size=10, indices=['snaps'])
+    snaps = request.db.search(query, size=10, indices=['snaps'],
+                              sort='timestamp')
 
     data = {'snaps': snaps,
             'format_date': format_es_date}
@@ -133,7 +135,8 @@ def profile(request):
     """Profile page."""
     if request.user:
         query = FieldQuery(FieldParameter('user', request.user.id))
-        snaps = request.db.search(query, indices=['snaps'])
+        snaps = request.db.search(query, indices=['snaps'],
+                                  sort='timestamp')
     else:
         snaps = []
 
