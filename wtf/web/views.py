@@ -78,7 +78,7 @@ def about(request):
 def plants(request):
     """Plants page."""
     query = StringQuery('*')
-    snaps = request.elasticsearch.search(query, size=10, indices=['plants'],
+    snaps = request.db.search(query, size=10, indices=['plants'],
                                          )
     data = {'plants': snaps,
             'format_date': format_es_date}
@@ -93,11 +93,11 @@ def plant(request):
     filename = request.matchdict['file']
     name = os.path.basename(filename)
     query = FieldQuery(FieldParameter('plant', name))
-    snaps = request.elasticsearch.search(query, size=10, indices=['snaps'])
+    snaps = request.db.search(query, size=10, indices=['snaps'])
 
     # TODO: we should use plant id here instead
     query = FieldQuery(FieldParameter('name', name))
-    plant = list(request.elasticsearch.search(query, indices=['plants']))[0]
+    plant = list(request.db.search(query, indices=['plants']))[0]
 
     filename = plant.get('filename')
     if filename:
@@ -117,7 +117,7 @@ def plant(request):
 def index(request):
     """Index page."""
     query = StringQuery('*')
-    snaps = request.elasticsearch.search(query, size=10, indices=['snaps'])
+    snaps = request.db.search(query, size=10, indices=['snaps'])
 
     data = {'snaps': snaps,
             'format_date': format_es_date}
@@ -131,7 +131,7 @@ def profile(request):
     """Profile page."""
     if request.user:
         query = FieldQuery(FieldParameter('user', request.user.id))
-        snaps = request.elasticsearch.search(query, indices=['snaps'])
+        snaps = request.db.search(query, indices=['snaps'])
     else:
         snaps = []
 
@@ -150,19 +150,19 @@ def sign(request):
 
     # Signup new user
     query = FieldQuery(FieldParameter('email', email))
-    res = request.elasticsearch.search(query)
+    res = request.db.search(query)
     if len(res) == 0:
         doc = {
             'id': str(uuid4()),
             'email': email,
             'registered': datetime.datetime.utcnow(),
         }
-        res = request.elasticsearch.index(doc, 'users', 'usertype', doc['id'])
+        res = request.db.index(doc, 'users', 'usertype', doc['id'])
         if res['ok'] == False:
             logger.error("Signup failure")
             logger.error(res)
             raise HTTPServerError()
-        request.elasticsearch.refresh()
+        request.db.refresh()
 
     return HTTPFound(location='/')
 
@@ -204,7 +204,7 @@ def snapshot(request):
         warped_img_path, new_base, new_top = warp_img(file_path, base, top)
         # There should be only one
         snap_idx, snap_type = 'snaps', 'snaptype'
-        snap = request.elasticsearch.get(snap_idx, snap_type, file_uuid)
+        snap = request.db.get(snap_idx, snap_type, file_uuid)
         warped_filename = os.path.basename(warped_img_path)
         if snap is not None:
             snap['warped_filename'] = warped_filename
@@ -214,8 +214,8 @@ def snapshot(request):
             snap['top_x'] = top[0]
             snap['top_y'] = top[1]
             logger.debug("Updating snap %s: %r", file_uuid, snap)
-            request.elasticsearch.index(snap, snap_idx, snap_type, file_uuid)
-            request.elasticsearch.refresh()
+            request.db.index(snap, snap_idx, snap_type, file_uuid)
+            request.db.refresh()
             # TODO: compute features here
             FEATURES_CACHE[warped_filename] = 'FEATURES'
         else:
@@ -289,7 +289,9 @@ def upload_plant(request):
 
     if request.method == 'POST':
         pic = request.POST.get('picture')
-        name = request.POST.get('name', str(uuid4()))
+        name = request.POST.get('name', '')
+        if not name:
+            name = str(uuid4())
 
         if pic not in (None, ''):
             name, ext = _save_pic(pic, request, name)
@@ -297,6 +299,7 @@ def upload_plant(request):
         else:
             filename = None
 
+        # TODO: check if plant exist first
         # Add to Elastic Search
         doc = {
             'user': request.user.id,
@@ -308,12 +311,13 @@ def upload_plant(request):
             'geo_accuracy': request.POST.get('accuracy'),
             'name': name,
         }
-        res = request.elasticsearch.index(doc, index, type_, name)
+        logger.debug("Indexing plant %s: %r", name, doc)
+        res = request.db.index(doc, index, type_, name)
         if not res['ok']:
-            logger.error("Error while saving index")
+            logger.error("Error while creating plant %s", name)
             logger.error(res)
             raise HTTPServerError()
-        request.elasticsearch.refresh()
+        request.db.refresh()
         request.session.flash('Plant registered')
         return HTTPFound(location='/%s/%s' % (root, name))
 
@@ -336,14 +340,14 @@ def upload_plant_snaps(request):
            'filename': file_uuid + ext,
            'plant': plant_name,
         }
-        res = request.elasticsearch.index(doc, 'snaps', 'snaptype', file_uuid)
+        res = request.db.index(doc, 'snaps', 'snaptype', file_uuid)
         if not res['ok']:
             logger.error("Error while saving index")
             logger.error(res)
             raise HTTPServerError()
         uploaded += 1
 
-    request.elasticsearch.refresh()
+    request.db.refresh()
     request.session.flash("Uploaded %d snaps" % uploaded)
     return HTTPFound(location='/plant/%s' % plant_name)
 
@@ -387,14 +391,14 @@ def _upload(request, index, type_, root):
             'name': request.POST.get('name')
         }
 
-        res = request.elasticsearch.index(doc, index, type_, file_uuid)
+        res = request.db.index(doc, index, type_, file_uuid)
         if not res['ok']:
             logger.error("Error while saving index %r for %r",
                          index, file_uuid)
             logger.error(res)
             raise HTTPServerError()
 
-        request.elasticsearch.refresh()
+        request.db.refresh()
         request.session.flash('Image uploaded')
         return HTTPFound(location='/%s/%s' % (root, file_uuid + ext))
 

@@ -13,7 +13,7 @@ class Request(BaseRequest):
     """
 
     @reify
-    def elasticsearch(self):
+    def db(self):
         """
         Get the Elastic Search connection
         """
@@ -28,7 +28,7 @@ class Request(BaseRequest):
         email = authenticated_userid(self)
         if email is not None:
             query = FieldQuery(FieldParameter('email', email))
-            res = self.elasticsearch.search(query)
+            res = self.db.search(query)
             if len(res) > 0:
                 return res[0]
         return None
