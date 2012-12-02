@@ -161,6 +161,7 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
 
 def compute_features(file_path):
     """Compute a vector of histogram-style features"""
+    logger.debug("Extracting features for %s", file_path)
     image = color.rgb2gray(imread(file_path))
     fd = hog(image, orientations=8, pixels_per_cell=(16, 16),
              cells_per_block=(1, 1))
@@ -175,7 +176,7 @@ def compute_features_collection(snaps, pic_dir, cache=None):
     snaps_with_features = []
     features_list = []
     for snap in snaps:
-        snap_id = snap.file_uuid
+        snap_id = snap.filename
         features = cache.get(snap_id)
         if features is not None:
             snaps_with_features.append(snap)
@@ -205,12 +206,12 @@ def suggest_snaps(query_snap, other_snaps, pic_dir, cache=None,
 
     if not query_snap.warped:
         raise ValueError()
-    query_features = cache.get(query_snap.file_uuid)
+    query_features = cache.get(query_snap.filename)
     if query_features is None:
         query_warped_file_path = os.path.join(
             pic_dir, query_snap.warped_filename)
         query_features = compute_features(query_warped_file_path)
-        cache[query_snap.file_uuid] = query_features
+        cache[query_snap.filename] = query_features
 
     snaps, features = compute_features_collection(
         other_snaps, pic_dir, cache=cache)
@@ -223,7 +224,7 @@ def suggest_snaps(query_snap, other_snaps, pic_dir, cache=None,
         raise NotImplementedError('criterion: ' + criterion)
 
     if minimize:
-        ordering = np.argsort(scores)[::-1]
-    else:
         ordering = np.argsort(scores)
-    return snaps[ordering]
+    else:
+        ordering = np.argsort(scores)[::-1]
+    return snaps[ordering], scores[ordering]
