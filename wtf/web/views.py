@@ -1,6 +1,7 @@
 import os
 import datetime
 from uuid import uuid4
+from collections import OrderedDict
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
@@ -218,6 +219,29 @@ def warped(request):
     orig_img = os.path.join(pic_dir, filename)
     res = get_img_size(orig_img)
 
+    file_uuid = os.path.splitext(filename)[0]
+    snap_idx, snap_type = 'snaps', 'snaptype'
+    snap = request.db.get(snap_idx, snap_type, file_uuid[:-len('_warped')])
+
+    if not snap.plant:
+
+        def _best(plant):
+           """Return 3 leaves from the plant"""
+           query = FieldQuery(FieldParameter('plant', plant))
+           return list(request.db.search(query, size=3, indices=['snaps'],
+                                    sort='timestamp'))
+                
+        query = StringQuery('*')
+        snaps = request.db.search(query, size=10, indices=['plants'],
+                                  sort='name')
+
+        plants = [(snap['name'], (snap, _best(snap['name']))) for snap in snaps]
+        plants.reverse()
+        suggestions = OrderedDict(plants)
+
+    else:
+        suggestions = None
+
     if len(res) == 2:
         height, width = res
     else:
@@ -232,7 +256,9 @@ def warped(request):
     data = {'snapshot': filename,
             'original': get_original_path(filename),
             'width': width,
-            'height': height}
+            'height': height, 
+            'snap': snap,
+            'suggestions': suggestions}
 
     return _basic(request, data)
 
