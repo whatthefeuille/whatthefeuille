@@ -25,9 +25,7 @@ from wtf.processing import (
     save_normalized,
     warp_img,
 )
-
-import logging
-log = logging.getLogger(__name__)
+from wtf import logger
 
 
 TOPDIR = os.path.dirname(wtf.__file__)
@@ -36,6 +34,9 @@ TMPLDIR = os.path.join(TOPDIR, 'templates')
 TMPLS = TemplateLookup(directories=[TMPLDIR])
 JOBTIMEOUT = 3600    # one hour
 DOCDIR = os.path.join(TOPDIR, 'docs', 'build', 'html')
+
+# In memory feature cache to spare some CPU
+FEATURES_CACHE = {}
 
 
 def time2str(data):
@@ -116,8 +117,7 @@ def plant(request):
 def index(request):
     """Index page."""
     query = StringQuery('*')
-    snaps = request.elasticsearch.search(query, size=10, indices=['snaps'],
-                                         )
+    snaps = request.elasticsearch.search(query, size=10, indices=['snaps'])
 
     data = {'snaps': snaps,
             'basename': os.path.basename,
@@ -161,8 +161,8 @@ def sign(request):
         }
         res = request.elasticsearch.index(doc, 'users', 'usertype')
         if res['ok'] == False:
-            log.error("Signup failure")
-            log.error(res)
+            logger.error("Signup failure")
+            logger.error(res)
             raise HTTPServerError()
         request.elasticsearch.refresh()
 
@@ -201,7 +201,25 @@ def snapshot(request):
     if request.method == 'POST':
         base = _toint(request.POST['bottom_y']), _toint(request.POST['bottom_x'])
         top = _toint(request.POST['top_y']), _toint(request.POST['top_x'])
+        query = FieldQuery(FieldParameter('filename', filename))
         warped_image, new_base, new_top = warp_img(orig_img, base, top)
+        # There should be only one
+        snap_idx = 'snaps'
+        snaps = request.elasticsearch.search(query, size=2, indices=[snap_idx])
+        if len(snaps) > 1:
+            logger.warning("Found more than one snapshot for file %s", filename)
+        elif len(snaps) >= 1:
+            snap = snaps[0]
+            snap['warped_filename'] = warped_image
+            snap['warped'] = True
+            snap['base_x'] = base[0]
+            snap['base_y'] = base[1]
+            snap['top_x'] = top[0]
+            snap['top_y'] = top[1]
+            request.elasticsearch.index(snap, snap_idx, 'snaptype')
+            request.elasticsearch.refresh()
+            # TODO: compute features here
+            FEATURES_CACHE[warped_image] = 'FEATURES'
         return HTTPFound(location='/warped/%s' %
                 os.path.basename(warped_image))
 
@@ -294,8 +312,8 @@ def upload_plant(request):
 
         res = request.elasticsearch.index(doc, index, type_)
         if not res['ok']:
-            log.error("Error while saving index")
-            log.error(res)
+            logger.error("Error while saving index")
+            logger.error(res)
             raise HTTPServerError()
 
         request.elasticsearch.refresh()
@@ -321,8 +339,8 @@ def upload_plant_snaps(request):
         }
         res = request.elasticsearch.index(doc, 'snaps', 'snaptype')
         if not res['ok']:
-            log.error("Error while saving index")
-            log.error(res)
+            logger.error("Error while saving index")
+            logger.error(res)
             raise HTTPServerError()
 
         uploaded +=1
@@ -375,8 +393,8 @@ def _upload(request, index, type_, root):
 
         res = request.elasticsearch.index(doc, index, type_)
         if not res['ok']:
-            log.error("Error while saving index")
-            log.error(res)
+            logger.error("Error while saving index")
+            logger.error(res)
             raise HTTPServerError()
 
         request.elasticsearch.refresh()

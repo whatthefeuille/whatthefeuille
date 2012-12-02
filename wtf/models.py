@@ -108,6 +108,15 @@ SNAP_MAPPING = {
         'type': 'integer',
         'store': 'yes',
     },
+    'warped_filename': {
+        'type': 'string',
+        'store': 'yes',
+        'index': 'not_analyzed',
+    },
+    'warped': {
+        'type': 'boolean',
+        'store': 'yes',
+    },
     'plant': {
         'type': 'string',
         'store': 'yes',
