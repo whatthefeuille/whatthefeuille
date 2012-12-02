@@ -119,10 +119,8 @@ def index(request):
     query = StringQuery('*')
     snaps = request.db.search(query, size=10, indices=['snaps'],
                               sort='timestamp:desc')
-
     data = {'snaps': snaps,
             'format_date': format_es_date}
-
     return _basic(request, data)
 
 
