@@ -89,6 +89,10 @@ def plants(request):
 
 @view_config(route_name='plant', request_method='GET',
              renderer='plant.mako')
+def plant(request):
+    """Plant page."""
+    name = request.matchdict['name']
+    query = FieldQuery(FieldParameter('plant', name))
     snaps = request.db.search(query, size=20, indices=['snaps'],
                               sort='timestamp:desc')
 
@@ -119,8 +123,10 @@ def index(request):
     query = StringQuery('*')
     snaps = request.db.search(query, size=10, indices=['snaps'],
                               sort='timestamp:desc')
+
     data = {'snaps': snaps,
             'format_date': format_es_date}
+
     return _basic(request, data)
 
 
