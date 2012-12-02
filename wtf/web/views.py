@@ -102,7 +102,7 @@ def plant(request):
         raise HTTPNotFound("No plant registered under %s" % name)
     plant = plants[0]
     filename = plant.get('filename')
-    
+
     if filename:
         image = '/thumbs/large/' + filename
     else:

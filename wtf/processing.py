@@ -97,7 +97,12 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
     x_slice = slice(offset[0], offset[0] + original.shape[0])
     y_slice = slice(offset[1], offset[1] + original.shape[1])
 
-    embedded[x_slice, y_slice, :] = original
+    try:
+        embedded[x_slice, y_slice, :] = original
+    except ValueError:
+        logger.warning("Invalid base and top positions on image %s: %r, %r",
+                       raw_img_path, base, top)
+        return raw_img_path, tuple(base), tuple(top)
 
     # Check the original base and top coordinate positions
     embedded_base = base + offset
