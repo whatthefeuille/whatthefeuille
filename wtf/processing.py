@@ -121,7 +121,6 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
 
     rotation = (np.arctan2(warped_vector[0], warped_vector[1])
                 - np.arctan2(orig_vector[0], orig_vector[1]))
-    rotation %= 2 * np.pi
 
     rotation_degrees = rotation * -180. / np.pi
 
