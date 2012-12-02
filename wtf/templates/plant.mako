@@ -17,7 +17,7 @@
 
 <form action="/upload_plant_snaps" method="POST" id="uploadForm"
       enctype="multipart/form-data">
->
+
   <input type="file" multiple="multiple" name="snap"/>
   <input type="hidden" name="name" value="${name}"/>
   <input type="submit"/>

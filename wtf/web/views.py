@@ -95,7 +95,15 @@ def plant(request):
     name = request.matchdict['file']
     query = FieldQuery(FieldParameter('plant', name))
     snaps = request.elasticsearch.search(query, size=10, indices=['snaps'])
-    image = '/media/tree_icon.png'
+    
+    query = FieldQuery(FieldParameter('name', name))
+    plant = list(request.elasticsearch.search(query, indices=['plants']))[0]
+
+    filename = plant.get('filename')
+    if filename:
+        image = '/thumbs/large/' + os.path.basename(filename)
+    else:
+        image = '/media/tree_icon.png' 
 
     data = {'name': name,
             'image': image, 
@@ -158,6 +166,7 @@ def sign(request):
             log.error("Signup failure")
             log.error(res)
             raise HTTPServerError()
+        request.elasticsearch.refresh()
 
     return HTTPFound(location='/')
 
@@ -258,8 +267,44 @@ def upload(request):
 @view_config(route_name='upload_plant', request_method=('GET', 'POST'),
              renderer='upload_plant.mako')
 def upload_plant(request):
-    return _upload(request, 'plants', 'planttype', 'plant')
+    index, type_, root = 'plants', 'planttype', 'plant'    
+    ext = ''
+ 
+    if request.user is None:
+        raise Forbidden()
+ 
+    if request.method == 'POST':
+        pic = request.POST.get('picture')
+        basename = request.POST.get('name', str(uuid4()))
 
+        if pic not in (None, ''):
+            filename, __ = _save_pic(pic, request, basename)
+        else:
+            filename = None
+
+        # Add to Elastic Search
+        doc = {
+            'user': request.user.id,
+            'timestamp': datetime.datetime.utcnow(),
+            'filename': filename,
+            'gravatar': gravatar_image_url(request.user.email),
+            'geo_longitude': request.POST.get('longitude'),
+            'geo_latitude': request.POST.get('latitude'),
+            'geo_accuracy': request.POST.get('accuracy'),
+            'name': request.POST.get('name')
+        }
+
+        res = request.elasticsearch.index(doc, index, type_)
+        if not res['ok']:
+            log.error("Error while saving index")
+            log.error(res)
+            raise HTTPServerError()
+        
+        request.elasticsearch.refresh()
+        request.session.flash('Image uploaded')
+        return HTTPFound(location='/%s/%s' % (root, basename + ext))
+
+    return _basic(request)
 
 @view_config(route_name='upload_plant_snaps', request_method='POST')
 def upload_plant_snaps(request):
@@ -281,9 +326,10 @@ def upload_plant_snaps(request):
             log.error("Error while saving index")
             log.error(res)
             raise HTTPServerError()
-
+        
         uploaded +=1
-
+    
+    request.elasticsearch.refresh()
     request.session.flash("Uploaded %d snaps" % uploaded)
     return HTTPFound(location='/plant/%s' % plantname)
 
@@ -311,7 +357,7 @@ def _upload(request, index, type_, root):
         pic = request.POST.get('picture')
         basename = request.POST.get('name', str(uuid4()))
 
-        if pic is not None:	
+        if pic is not None:
             filename, ext = _save_pic(pic, request, basename)
         else:
             filename = None
@@ -335,6 +381,7 @@ def _upload(request, index, type_, root):
             log.error(res)
             raise HTTPServerError()
 
+        request.elasticsearch.refresh()
         request.session.flash('Image uploaded')
         return HTTPFound(location='/%s/%s' % (root, basename + ext))
 
