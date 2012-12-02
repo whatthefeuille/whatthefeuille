@@ -50,9 +50,9 @@
     <div class="container">
       %if messages:
       %for message in messages:
-      <div class="alert-message warning fade in" data-alert="alert">
-            <a class="close" href="#">×</a>
-            <p>${message}</p>
+      <div class="alert alert-info">
+          <button type="button" class="close" data-dismiss="alert">×</button>
+          <p>${message}</p>
       </div>
       %endfor
       %endif
