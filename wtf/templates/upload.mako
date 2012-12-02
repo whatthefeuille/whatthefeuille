@@ -5,7 +5,7 @@
 
 <h3>Upload a snapshot of a leaf</h3>
 
-<p class="tip">Tip: try to put the leaf on a contrasted, unified background</p>
+<p class="tip alert alert-info">Tip: try to put the leaf on a contrasted, unified background</p>
 
 <form action="/upload" method="POST" id="uploadForm"
       enctype="multipart/form-data">

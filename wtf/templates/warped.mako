@@ -15,16 +15,17 @@
   </div>
 </form>
 
-<p class="tip">Tip: click on the image to correct the leaf alignment.</p>
+<p class="tip alert alert-info">Tip: click on the image if you want to correct the leaf alignment.</p>
 
 
 %if not snap.plant:
+<hr>
 <h3>Suggestions</h3>
-<p>Here's a list of plant suggestions, pick the one that fits</p>
+<p>Here's a list of plant suggestions, pick the one that fits:</p>
 
-%for plant, data in suggestions.items():
+%for i, (plant, data) in enumerate(suggestions.items(), start=1):
 <div class="suggestion">
-  <h3>${plant}</h3>
+  <h4>${i}. ${plant}</h4>
   <div class="suggestedPlant">
   <form action="/pick" method="POST" id="pick Form"
       enctype="multipart/form-data">
@@ -36,7 +37,7 @@
   %endif
    <input type="hidden" name="plant" value="${plant}"/>
    <input type="hidden" name="leaf" value="${uuid}"/>
-   <input type="submit" value="pick" name="pick"/>
+   <input type="submit" value="Pick!" name="pick"/>
   </form>
  </div>
  <div class="leafs">
