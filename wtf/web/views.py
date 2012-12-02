@@ -100,8 +100,8 @@ def plant(request):
     if not plants:
         raise HTTPNotFound("No plant registered under %s" % name)
     plant = plants[0]
-
     filename = plant.get('filename')
+    
     if filename:
         image = '/thumbs/large/' + filename
     else:
@@ -297,7 +297,7 @@ def upload_plant(request):
 
         if pic not in (None, ''):
             name, ext = _save_pic(pic, request, name)
-            filename = name, ext
+            filename = name + ext
         else:
             filename = None
 
