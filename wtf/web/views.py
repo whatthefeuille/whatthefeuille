@@ -89,12 +89,8 @@ def plants(request):
 
 @view_config(route_name='plant', request_method='GET',
              renderer='plant.mako')
-def plant(request):
-    """Plant page."""
-    name = request.matchdict['name']
-    query = FieldQuery(FieldParameter('plant', name))
     snaps = request.db.search(query, size=20, indices=['snaps'],
-                              sort='timestamp')
+                              sort='timestamp:desc')
 
     # TODO: we should use plant id here instead
     query = FieldQuery(FieldParameter('name', name))
@@ -122,7 +118,7 @@ def index(request):
     """Index page."""
     query = StringQuery('*')
     snaps = request.db.search(query, size=10, indices=['snaps'],
-                              sort='timestamp')
+                              sort='timestamp:desc')
 
     data = {'snaps': snaps,
             'format_date': format_es_date}
@@ -137,7 +133,7 @@ def profile(request):
     if request.user:
         query = FieldQuery(FieldParameter('user', request.user.id))
         snaps = request.db.search(query, indices=['snaps'],
-                                  sort='timestamp')
+                                  sort='timestamp:desc')
     else:
         snaps = []
 
@@ -230,7 +226,7 @@ def warped(request):
            query = FieldQuery(FieldParameter('plant', plant))
            return list(request.db.search(query, size=3, indices=['snaps'],
                                     sort='timestamp'))
-                
+
         query = StringQuery('*')
         snaps = request.db.search(query, size=10, indices=['plants'],
                                   sort='name')
@@ -256,9 +252,9 @@ def warped(request):
     data = {'snapshot': filename,
             'original': get_original_path(filename),
             'width': width,
-            'height': height, 
+            'height': height,
             'snap': snap,
-            'uuid': file_uuid, 
+            'uuid': file_uuid,
             'suggestions': suggestions}
 
     return _basic(request, data)
