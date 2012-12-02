@@ -66,7 +66,7 @@ def main(global_config, **settings):
     config.add_route('warped', '/warped/{file:.*}')
     config.add_route('picture', '/picture/{file:.*}')
     config.add_route('plants', '/plant')
-    config.add_route('plant', '/plant/{file:.*}')
+    config.add_route('plant', '/plant/{name:.*}')
 
     config.add_static_view('media', 'wtf:media/')
 

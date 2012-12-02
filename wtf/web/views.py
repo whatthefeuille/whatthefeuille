@@ -90,14 +90,16 @@ def plants(request):
              renderer='plant.mako')
 def plant(request):
     """Plant page."""
-    filename = request.matchdict['file']
-    name = os.path.basename(filename)
+    name = request.matchdict['name']
     query = FieldQuery(FieldParameter('plant', name))
     snaps = request.db.search(query, size=10, indices=['snaps'])
 
     # TODO: we should use plant id here instead
     query = FieldQuery(FieldParameter('name', name))
-    plant = list(request.db.search(query, indices=['plants']))[0]
+    plants = list(request.db.search(query, indices=['plants']))
+    if not plants:
+        raise HTTPNotFound("No plant registered under %s" % name)
+    plant = plants[0]
 
     filename = plant.get('filename')
     if filename:
