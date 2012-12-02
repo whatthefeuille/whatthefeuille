@@ -1,7 +1,5 @@
 <%inherit file="base.mako"/>
 
-
-
 <h3>Create a new plant.</h3>
 
 <form action="/upload_plant" method="POST" id="uploadForm"
@@ -15,6 +13,4 @@
  <div>
    <input type="submit" name="ok"/>
  </div>
-
 </form>
- 

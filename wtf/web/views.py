@@ -293,14 +293,15 @@ def upload_plant(request):
 
         if pic not in (None, ''):
             name, ext = _save_pic(pic, request, name)
+            filename = name, ext
         else:
-            ext = '.bin'
+            filename = None
 
         # Add to Elastic Search
         doc = {
             'user': request.user.id,
             'timestamp': datetime.datetime.utcnow(),
-            'filename': name + ext,
+            'filename': filename,
             'gravatar': gravatar_image_url(request.user.email),
             'geo_longitude': request.POST.get('longitude'),
             'geo_latitude': request.POST.get('latitude'),
