@@ -231,7 +231,7 @@ def upload(request):
         pic_dir = settings['thumbs.document_root']
         basename = str(uuid4())
         filename = os.path.join(pic_dir, basename + ext)
-
+        
         if not os.path.exists(pic_dir):
             os.makedirs(pic_dir)
 
@@ -245,7 +245,11 @@ def upload(request):
             'timestamp': datetime.datetime.utcnow(),
             'filename': filename,
             'gravatar': gravatar_image_url(request.user.email),
+            'geo_longitude': request.POST.get('longitude'),
+            'geo_latitude': request.POST.get('latitude'),
+            'geo_accuracy': request.POST.get('accuracy')
         }
+
         res = request.elasticsearch.index(doc, 'snaps', 'snaptype')
         if not res['ok']:
             log.error("Error while saving snap")

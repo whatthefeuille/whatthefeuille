@@ -35,3 +35,78 @@ $("#pointer_div").click(function(e) {
         $('input[type="submit"]').removeAttr('disabled');
     }
 });
+
+
+var latitude;
+var longitude;
+var accuracy;
+
+function loadLocation() {
+  if (navigator.geolocation) {
+    
+    if ($.cookie("posLat")) {
+	latitude = $.cookie("posLat");
+	longitude = $.cookie("posLon");
+	accuracy = $.cookie("posAccuracy");
+	updateDisplay();
+	
+    } else {
+	navigator.geolocation.getCurrentPosition(
+			    success_handler, 
+			    error_handler, 
+			    {timeout:10000});
+    }
+}
+}
+
+function success_handler(position) {
+  latitude = position.coords.latitude;
+  longitude = position.coords.longitude;
+  accuracy = position.coords.accuracy;
+
+  if (!latitude || !longitude) {
+    return;
+  }
+
+  updateDisplay();
+  $.cookie("posLat", latitude);
+  $.cookie("posLon", longitude);
+  $.cookie("posAccuracy", accuracy);
+}
+
+function updateDisplay() {
+
+  var gmapdata = '<img src="http://maps.google.com/maps/api/staticmap?center=' + latitude + ',' + longitude + '&zoom=16&size=425x350&sensor=false" />';
+   document.getElementById("placeholder").innerHTML = gmapdata;
+   $("#latitude").val(latitude);
+   $("#longitude").val(longitude);
+   $("#accuracy").val(accuracy);
+}
+
+
+function error_handler(error) {
+
+  var locationError = '';
+
+ switch(error.code){
+  case 0:
+    locationError = "There was an error while retrieving your location: " + error.message;
+    break;
+  case 1:
+    locationError = "The user prevented this page from retrieving a location.";
+    break;
+  case 2:
+    locationError = "The browser was unable to determine your location: " + error.message;
+    break;
+  case 3:
+    locationError = "The browser timed out before retrieving the location.";
+    break;
+  }
+
+}
+
+function clear_cookies() {
+  $.cookie('posLat', null);
+}
+
+
