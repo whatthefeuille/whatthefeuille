@@ -243,7 +243,8 @@ def upload(request):
         doc = {
             'user': request.user.id,
             'timestamp': datetime.datetime.utcnow(),
-            'filename': filename,'gravatar': gravatar_image_url,
+            'filename': filename,
+            'gravatar': gravatar_image_url(request.user.email),
         }
         res = request.elasticsearch.index(doc, 'snaps', 'snaptype')
         if not res['ok']:
