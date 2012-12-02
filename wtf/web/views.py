@@ -15,7 +15,7 @@ from pyramid.exceptions import Forbidden
 
 from mako.lookup import TemplateLookup
 
-from pyes.query import FieldQuery, FieldParameter
+from pyes.query import FieldQuery, FieldParameter, StringQuery
 
 from wtf.dates import format_es_date
 from wtf.gravatar import gravatar_image_url
@@ -67,10 +67,25 @@ def _basic(request, existing=None):
     return existing
 
 
+@view_config(route_name='about', request_method='GET',
+             renderer='about.mako')
+def about(request):
+    """About page."""
+    return _basic(request)
+
+
 @view_config(route_name='index', request_method='GET', renderer='index.mako')
 def index(request):
     """Index page."""
-    return _basic(request)
+    query = StringQuery('*')
+    snaps = request.elasticsearch.search(query, size=10, indices=['snaps'],
+                                         )
+
+    data = {'snaps': snaps,
+            'basename': os.path.basename,
+            'format_date': format_es_date}
+
+    return _basic(request, data)
 
 
 @view_config(route_name='profile', request_method=('GET', 'POST'),
@@ -88,25 +103,6 @@ def profile(request):
             'format_date': format_es_date}
 
     return _basic(request, data)
-
-
-@view_config(route_name='about_index')
-def about_index(request):
-    """Redirects / to /index.html"""
-    return HTTPFound('/about/index.html')
-
-
-@view_config(route_name='about_file')
-def about_dir(request):
-    """Returns Sphinx files"""
-    filename = request.matchdict['file']
-    elmts = filename.split(os.sep)
-    for unsecure in ('.', '..'):
-        if unsecure in elmts:
-            return HTTPNotFound()
-
-    path = os.path.join(DOCDIR, filename)
-    return FileResponse(path, request)
 
 
 @view_config(route_name='sign')

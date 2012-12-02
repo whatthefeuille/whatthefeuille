@@ -32,7 +32,6 @@
           <a class="brand" href="/">What The Feuille</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li><a href="/about">About</a></li>
               <li><a href="/upload">Upload</a></li>
               %if user:
               <li>
@@ -48,6 +47,7 @@
               <img id="signin" src="/media/sign_in_blue.png"/>
               </li>
               %endif
+              <li><a href="/about">About</a></li>
             </ul>
           </div><!--/.nav-collapse -->
         </div>
@@ -59,8 +59,8 @@
 
       <hr>
       <footer>
-      <p>&copy; Ronan - Olivier - Tarek 2012</p>
-      <p>Recognizing your leaves since 2012</p>
+      <p>&copy; Ronan - Olivier - Tarek - 2012 -- Recognizing your leaves since
+      2012</p>
       </footer>
 
     </div>

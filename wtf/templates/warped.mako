@@ -4,7 +4,7 @@
 <p>Click the image to edit the transformation</p>
 
 <form action="." method="post">
-    <div class="snapshot">
+    <div>
         <a href="/snapshot/${original}">
             <img src="/picture/${snapshot}"/>
         </a>
