@@ -15,14 +15,13 @@
         %if plant.filename:
         <a class="image" href="/plant/${plant.name}"
            style="background-image: url('/thumbs/large/${plant.filename}')">
-        </a>
         %endif
         %if not plant.filename:
         <a class="image" href="/plant/${plant.name}"
           style="background-image: url('/media/tree_icon.png')">
-             <span>${plant.name}<span>
+          %endif
+             <span class="name">${plant.name}<span>
         </a>
-        %endif
         <div class="bar">
             <div class="date">Posted on ${format_date(plant.timestamp)}</div>
         </div>
