@@ -201,7 +201,7 @@ def snapshot(request):
     if request.method == 'POST':
         base = _toint(request.POST['bottom_y']), _toint(request.POST['bottom_x'])
         top = _toint(request.POST['top_y']), _toint(request.POST['top_x'])
-        query = FieldQuery(FieldParameter('filename', filename))
+        query = FieldQuery(FieldParameter('filename', orig_img))
         warped_image, new_base, new_top = warp_img(orig_img, base, top)
         # There should be only one
         snap_idx = 'snaps'
@@ -220,6 +220,8 @@ def snapshot(request):
             request.elasticsearch.refresh()
             # TODO: compute features here
             FEATURES_CACHE[warped_image] = 'FEATURES'
+        else:
+            logger.warning("Could not find snap for %s", orig_img)
         return HTTPFound(location='/warped/%s' %
                 os.path.basename(warped_image))
 
@@ -332,7 +334,7 @@ def upload_plant_snaps(request):
 
         filename, ext = _save_pic(value, request)
         doc = {
-	   'user': request.user.id,
+            'user': request.user.id,
            'timestamp': datetime.datetime.utcnow(),
            'filename': filename,
            'plant': plantname
@@ -342,8 +344,7 @@ def upload_plant_snaps(request):
             logger.error("Error while saving index")
             logger.error(res)
             raise HTTPServerError()
-
-        uploaded +=1
+        uploaded += 1
 
     request.elasticsearch.refresh()
     request.session.flash("Uploaded %d snaps" % uploaded)
