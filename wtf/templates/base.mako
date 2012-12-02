@@ -61,8 +61,8 @@
 
       <hr>
       <footer>
-      <p>&copy; Ronan - Olivier - Tarek - 2012 -- Recognizing your leaves since
-      2012</p>
+        <p>&copy; Tarek, Olivier &amp; Ronan &mdash; Recognizing your leaves since 2012
+      </p>
       </footer>
 
     </div>
