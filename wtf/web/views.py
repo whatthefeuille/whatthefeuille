@@ -74,6 +74,37 @@ def about(request):
     return _basic(request)
 
 
+@view_config(route_name='plants', request_method='GET', 
+             renderer='plants.mako')
+def plants(request):
+    """Plants page."""
+    query = StringQuery('*')
+    snaps = request.elasticsearch.search(query, size=10, indices=['plants'],
+                                         )
+    data = {'plants': snaps,
+            'basename': os.path.basename,
+            'format_date': format_es_date}
+
+    return _basic(request, data)
+
+
+@view_config(route_name='plant', request_method='GET', 
+             renderer='plant.mako')
+def plant(request):
+    """Plant page."""
+    name = request.matchdict['file']
+    query = FieldQuery(plant=name)
+    snaps = request.elasticsearch.search(query, size=10, indices=['snaps'])
+    media = '/media/tree_icon.png'
+    data = {'plant': name,
+            'image': image, 
+            'snaps': snaps,
+            'basename': os.path.basename,
+            'format_date': format_es_date}
+
+    return _basic(request, data)
+
+
 @view_config(route_name='index', request_method='GET', renderer='index.mako')
 def index(request):
     """Index page."""
@@ -220,24 +251,39 @@ def picture(request):
 @view_config(route_name='upload', request_method=('GET', 'POST'),
              renderer='upload.mako')
 def upload(request):
-    """Profile page."""
+    return _upload(request, 'snaps', 'snaptype', 'snapshot')
+
+
+@view_config(route_name='upload_plant', request_method=('GET', 'POST'),
+             renderer='upload_plant.mako')
+def upload_plant(request):
+    return _upload(request, 'plants', 'planttype', 'plant')
+
+
+
+def _upload(request, index, type_, root):
     if request.user is None:
         raise Forbidden()
+ 
+    if request.method == 'POST':
+        pic = request.POST.get('picture')
 
-    if 'picture' in request.POST:
-        pic = request.POST['picture'].file
-        ext = os.path.splitext(request.POST['picture'].filename)[-1]
-        settings = dict(request.registry.settings)
-        pic_dir = settings['thumbs.document_root']
-        basename = str(uuid4())
-        filename = os.path.join(pic_dir, basename + ext)
-        
-        if not os.path.exists(pic_dir):
-            os.makedirs(pic_dir)
+        if pic:	
+            pic = request.POST['picture'].file
+            ext = os.path.splitext(request.POST['picture'].filename)[-1]
+            settings = dict(request.registry.settings)
+            pic_dir = settings['thumbs.document_root']
+            filename = os.path.join(pic_dir, basename + ext)
+            basename = str(uuid4())
+            if not os.path.exists(pic_dir):
+                os.makedirs(pic_dir)
 
-        save_normalized(pic, filename)
-
-        pic.close()
+            save_normalized(pic, filename)
+            pic.close()
+        else:
+            filename = None
+            ext = ''
+            basename = request.POST.get('name', str(uuid4))
 
         # Add to Elastic Search
         doc = {
@@ -247,17 +293,17 @@ def upload(request):
             'gravatar': gravatar_image_url(request.user.email),
             'geo_longitude': request.POST.get('longitude'),
             'geo_latitude': request.POST.get('latitude'),
-            'geo_accuracy': request.POST.get('accuracy')
+            'geo_accuracy': request.POST.get('accuracy'),
+            'name': request.POST.get('name')
         }
 
-        res = request.elasticsearch.index(doc, 'snaps', 'snaptype')
+        res = request.elasticsearch.index(doc, index, type_)
         if not res['ok']:
-            log.error("Error while saving snap")
+            log.error("Error while saving index")
             log.error(res)
             raise HTTPServerError()
 
         request.session.flash('Image uploaded')
-        return HTTPFound(location='/snapshot/%s' % basename + ext)
+        return HTTPFound(location='/%s/%s' % (root, basename + ext))
 
     return _basic(request)
-

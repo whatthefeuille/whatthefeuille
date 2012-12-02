@@ -60,9 +60,12 @@ def main(global_config, **settings):
     config.add_route('logout', '/logout')
     config.add_route('about', '/about')
     config.add_route('upload', '/upload')
+    config.add_route('upload_plant', '/upload_plant')
     config.add_route('snapshot', '/snapshot/{file:.*}')
     config.add_route('warped', '/warped/{file:.*}')
     config.add_route('picture', '/picture/{file:.*}')
+    config.add_route('plants', '/plant')
+    config.add_route('plant', '/plant/{file:.*}')
 
     config.add_static_view('media', 'wtf:media/')
 

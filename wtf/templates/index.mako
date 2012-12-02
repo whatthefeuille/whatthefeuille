@@ -5,7 +5,7 @@
      <a class="image" href="/upload"
           style="background-image: url('/media/add.png')">
      </a>
-<div class="bar">
+    <div class="bar">
             <div class="date">Add a new snapshot...</div>
         </div>
 

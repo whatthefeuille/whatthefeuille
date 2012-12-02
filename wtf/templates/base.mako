@@ -32,6 +32,7 @@
           <a class="brand" href="/">What The Feuille</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
+              <li><a href="/plant">Plants</a></li>
               <li><a href="/upload">Upload</a></li>
               %if user:
               <li>
