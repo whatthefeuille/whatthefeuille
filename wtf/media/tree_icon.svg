@@ -14,7 +14,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.2 r9819"
-   sodipodi:docname="New document 1">
+   sodipodi:docname="tree_icon.svg">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -53,7 +53,10 @@
      id="layer1"
      transform="translate(0,-308.2677)">
     <g
-       id="g3765">
+       id="g3765"
+       inkscape:export-filename="/Users/ogrisel/coding/whatthefeuille/wtf/media/tree_icon.png"
+       inkscape:export-xdpi="31.419237"
+       inkscape:export-ydpi="31.419237">
       <rect
          transform="translate(0,308.2677)"
          y="335.79648"
