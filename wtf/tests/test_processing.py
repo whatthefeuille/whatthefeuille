@@ -7,6 +7,7 @@ from nose.tools import assert_true
 from wtf.processing import get_img_size
 from wtf.processing import get_warped_img_path
 from wtf.processing import warp_img
+from wtf.processing import compute_features
 
 
 TEMP_FOLDER = None
@@ -49,3 +50,11 @@ def test_warp_img():
 
     # The resulting image has a fixed size
     assert_equals(get_img_size(warped_path), (500, 500))
+
+
+def test_compute_features():
+    base = (300, 200)
+    top = (100, 200)
+    warped_path, warped_base, warped_top = warp_img(IMG_PATH, base, top)
+    features = compute_features(warped_path)
+    assert_equals(features.shape, (7688,))
