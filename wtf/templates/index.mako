@@ -13,7 +13,7 @@
     % for snap in snaps:
     <li>
         % if snap.warped:
-        <a class="image" href="/warped/${snap.filename}"
+        <a class="image" href="/warped/${snap.warped_filename}"
            style="background-image: url('/thumbs/large/${snap.warped_filename}')">
         </a>
         % else:
