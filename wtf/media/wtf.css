@@ -94,3 +94,11 @@ div.fileupload {
   _cursor: hand;
 
 }
+
+#plant {
+  margin-bottom: 14px;
+  border-radius: 10px;
+  background-position: center;
+  background-size: cover;
+  box-shadow: 1px 1px #AA9;
+}

@@ -7,9 +7,6 @@
     <meta name="viewport" content="width=device-width">
 
     <script src="/media/js/jquery.js"></script>
-    %if not user:
-    <script src="https://login.persona.org/include.js"></script>
-    %endif
     <style>
       body {
         padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
@@ -43,11 +40,6 @@
               </li>
               <li><a href="/logout">Logout</a></li>
               %endif
-              %if not user:
-              <li>
-              <img id="signin" src="/media/sign_in_blue.png"/>
-              </li>
-              %endif
               <li><a href="/about">About</a></li>
             </ul>
           </div><!--/.nav-collapse -->
@@ -77,30 +69,5 @@
     <script src="/media/js/bootstrap-collapse.js"></script>
     <script src="/media/js/bootstrap-carousel.js"></script>
     <script src="/media/js/bootstrap-typeahead.js"></script>
-    %if not user:
-    <script>
-      $(function() {
-        $("#signin").click(function() {
-          navigator.id.get(function(assertion) {
-            if (assertion) {
-              var $form = $("<form method=POST "+
-                "      action='/login'>" +
-                "  <input type='hidden' " +
-                "         name='assertion' " +
-                "         value='" + assertion + "' />" +
-                "  <input type='hidden' " +
-                "         name='came_from' "+
-                "         value='${came_from}' />" +
-                "  <input type='hidden' " +
-                "         name='csrf_token' "+
-                "         value='${csrf_token}' />" +
-                "</form>").appendTo($("body"));
-              $form.submit();
-            }
-          });
-        });
-      });
-    </script>
-    %endif
   </body>
 </html>

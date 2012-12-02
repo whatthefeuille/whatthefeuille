@@ -1,7 +1,7 @@
 <%inherit file="base.mako"/>
 
 <h3>${name}</h3>
-<img src="${image}"/>
+<img id="plant" src="${image}"/>
 
 <ul class="timeline">
     % for snap in snaps:
