@@ -7,6 +7,14 @@ body {
     background-image: url("/media/lightpaperfibers.png");
 }
 
+.navbar .brand {
+    background-image: url("/media/leaf-24x24.png");
+    background-position: left center;
+    background-repeat: no-repeat;
+    padding-left: 32px !important;
+    margin-left: 0 !important;
+}
+
 .sign img {
     margin-top: 1px;
 }
