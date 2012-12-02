@@ -116,10 +116,17 @@ div.fileupload {
     padding:0;
 }
 
-#uploadButton:hover {
-  cursor: pointer;
-  _cursor: hand;
+#uploadButton {
+    margin-bottom: 16px;
+}
 
+#uploadButton:hover {
+    cursor: pointer;
+    _cursor: hand;
+}
+
+.map {
+    text-align: center;
 }
 
 #plant {
