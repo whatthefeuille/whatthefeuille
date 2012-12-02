@@ -3,6 +3,8 @@ import numpy as np
 
 from skimage.io import imread
 from skimage.io import imsave
+from skimage.feature import hog
+from skimage import color
 
 from PIL import Image
 
@@ -154,3 +156,36 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
     warped_path = get_warped_img_path(raw_img_path)
     imsave(warped_path, warped)
     return warped_path, tuple(warped_base), tuple(warped_top)
+
+
+def compute_features(file_path):
+    """Compute a vector of histogram-style features"""
+    image = color.rgb2gray(imread(file_path))
+    fd = hog(image, orientations=8, pixels_per_cell=(16, 16),
+             cells_per_block=(1, 1))
+    return fd
+
+
+def compute_features_collection(snaps, pic_dir, cache=None):
+    """Compute the features for every element in the paths"""
+    if cache is None:
+        cache = {}
+
+    features_list = []
+    for snap in snaps:
+        snap_id = snap.file_uuid
+        features = cache.get(snap_id)
+        if features is not None:
+            features_list.append((snap_id, features))
+            continue
+
+        # Compute the features
+        if not snap.get('warped', False):
+            logger.warning('Cannot compute feature for unwarped %s',
+                           snap_id)
+            continue
+
+        warped_file_path = os.path.join(pic_dir, snap.warped_filename)
+        features_list.append(snap_id, compute_features(warped_file_path))
+
+    return features_list
