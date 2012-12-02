@@ -93,7 +93,7 @@ def plant(request):
     """Plant page."""
     name = request.matchdict['name']
     query = FieldQuery(FieldParameter('plant', name))
-    snaps = request.db.search(query, size=10, indices=['snaps'],
+    snaps = request.db.search(query, size=20, indices=['snaps'],
                               sort='timestamp')
 
     # TODO: we should use plant id here instead
