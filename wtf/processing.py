@@ -1,7 +1,6 @@
 import os
 import numpy as np
 
-from skimage import transform as tf
 from skimage.io import imread
 from skimage.io import imsave
 
@@ -31,11 +30,13 @@ def save_normalized(fileobj, filename):
     elif orientation == 4:
         image = image.transpose(Image.FLIP_TOP_BOTTOM)
     elif orientation == 5:
-        image = image.transpose(Image.FLIP_TOP_BOTTOM).transpose(Image.ROTATE_270)
+        image = image.transpose(
+            Image.FLIP_TOP_BOTTOM).transpose(Image.ROTATE_270)
     elif orientation == 6:
         image = image.transpose(Image.ROTATE_270)
     elif orientation == 7:
-        image = image.transpose(Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_270)
+        image = image.transpose(
+            Image.FLIP_LEFT_RIGHT).transpose(Image.ROTATE_270)
     elif orientation == 8:
         image = image.transpose(Image.ROTATE_90)
 
@@ -74,42 +75,62 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
     base and top positions in the new image.
 
     """
-    # Check the expected size of the resulting file
-    warped_img_size = np.array(warped_img_size)
-    warped_w, warped_h = warped_img_size
-
-    # Check the original base and top coordinate positions
+    # Load the data
+    original = imread(raw_img_path)
     base = np.array(base)
     top = np.array(top)
 
-    # Load the source image from the disk
-    img = imread(raw_img_path)
+    # Check the expected size of the resulting file
+    warped_img_size = np.array(warped_img_size)
+    warped_h, warped_w = warped_img_size
 
-    # Include the original picture in a larger ones to be able to perform the
-    # warp operation without losing data around the edges
-    img_max = np.max(img.shape[:2])
-    twice = img_max * 2
-    img_square = np.zeros(shape=(twice, twice, img.shape[2]), dtype=img.dtype)
-    img_center = (top + base) / 2
-    offset = np.array(img_square.shape[:2]) / 2 - img_center
-    base += offset
-    top += offset
+    bigger = np.max(original.shape[:2]) * 1.5
+    embedded = np.zeros(shape=(bigger, bigger, original.shape[2]),
+                        dtype=original.dtype)
 
-    x_slice = slice(offset[0], offset[0] + img.shape[0])
-    y_slice = slice(offset[1], offset[1] + img.shape[1])
+    original_center = (base + top) / 2
+    embedded_center = np.array(embedded.shape[:2]) / 2
+    offset = embedded_center - original_center
 
-    img_square[x_slice, y_slice, :] = img
+    x_slice = slice(offset[0], offset[0] + original.shape[0])
+    y_slice = slice(offset[1], offset[1] + original.shape[1])
 
-    # Find the geometric transformation to rotate / rescale the image to have
-    # the base under the top vertically aligned and horizontally centered
-    warped_base = ((0.5, 0.8) * warped_img_size).astype(np.int)
-    warped_top = ((0.5, 0.1) * warped_img_size).astype(np.int)
-    src = np.array([warped_base, warped_top])
-    dst = np.array([base, top])
+    embedded[x_slice, y_slice, :] = original
 
-    # Perform the transformation
-    tform = tf.estimate_transform('similarity', src, dst)
-    warped = tf.warp(img_square, tform)[:warped_w, :warped_h, :]
+    # Check the original base and top coordinate positions
+    embedded_base = base + offset
+    embedded_top = top + offset
+
+    warped_base = ((0.8, 0.5) * warped_img_size).astype(np.int)
+    warped_top = ((0.1, 0.5) * warped_img_size).astype(np.int)
+
+    orig_vector = embedded_top - embedded_base
+    orig_norm = np.linalg.norm(orig_vector)
+
+    warped_vector = warped_top - warped_base
+    warped_norm = np.linalg.norm(warped_vector)
+    scale = warped_norm / orig_norm
+    rotation = np.arccos(
+        np.dot(warped_vector, orig_vector) /
+        (orig_norm * warped_norm)
+    )
+
+    pil_rotated = Image.fromarray(embedded).rotate(
+        -rotation * 180. / np.pi)
+
+    scaled_size = (int(embedded.shape[0] * scale),
+                   int(embedded.shape[1] * scale))
+
+    pil_scaled = pil_rotated.resize(scaled_size, Image.ANTIALIAS)
+
+    scaled = np.array(pil_scaled)
+    scaled_center = np.array(scaled.shape[:2]) / 2
+
+    x_slice = slice(scaled_center[0] - warped_h / 2,
+                    scaled_center[0] + warped_h / 2)
+    y_slice = slice(scaled_center[1] - warped_w / 2,
+                    scaled_center[1] + warped_w / 2)
+    warped = scaled[x_slice, y_slice, :]
 
     # Save the result back on the harddrive
     warped_path = get_warped_img_path(raw_img_path)
