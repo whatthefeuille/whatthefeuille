@@ -29,8 +29,8 @@
           <a class="brand" href="/">What The Feuille</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li><a href="/plant">Plants</a></li>
-              <li><a href="/upload">Upload</a></li>
+              <li><a href="/plant">Leafopedia</a></li>
+              <li><a href="/upload">Upload Snapshot</a></li>
               %if user:
               <li>
               <a href="/profile">

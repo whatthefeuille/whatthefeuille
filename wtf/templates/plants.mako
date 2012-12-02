@@ -3,7 +3,7 @@
 <ul class="timeline">
 
    <li>
-     <a class="image" href="/upload_plant"
+     <a class="image add" href="/upload_plant"
           style="background-image: url('/media/add.png')">
      </a>
      <div class="bar">

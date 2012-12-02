@@ -58,6 +58,10 @@ body {
     height: 180px;
 }
 
+.timeline li .image.add {
+    border: thin solid #E0E0E0;
+}
+
 .timeline li .bar {
     padding: 6px 12px;
     border-left: thin solid #CCB;
