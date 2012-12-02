@@ -258,6 +258,7 @@ def warped(request):
             'width': width,
             'height': height, 
             'snap': snap,
+            'uuid': file_uuid, 
             'suggestions': suggestions}
 
     return _basic(request, data)
@@ -408,3 +409,22 @@ def _upload(request, index, type_, root):
         return HTTPFound(location='/%s/%s' % (root, file_uuid + ext))
 
     return _basic(request)
+
+
+@view_config(route_name='pick', request_method='POST')
+def pick(request):
+    plant_name = request.POST['plant']
+    leaf_uuid = request.POST['leaf'][:-len('_warped')]
+    snap_idx, snap_type = 'snaps', 'snaptype'
+    doc = request.db.get(snap_idx, snap_type, leaf_uuid)
+    doc['plant'] = plant_name
+    res = request.db.index(doc, snap_idx, snap_type, leaf_uuid)
+    if not res['ok']:
+        logger.error("Error while saving index")
+        logger.error(res)
+        raise HTTPServerError()
+
+    request.db.refresh()
+    request.session.flash("Picked %s!" % plant_name)
+    base, ext = os.path.splitext(doc.filename)
+    return HTTPFound(location='/warped/%s_warped%s' % (base, ext))

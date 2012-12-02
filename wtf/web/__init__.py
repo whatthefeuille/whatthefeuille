@@ -84,6 +84,7 @@ def main(global_config, **settings):
     config.add_route('upload_plant_snaps', '/upload_plant_snaps')
     config.add_route('snapshot', '/snapshot/{file:.*}')
     config.add_route('warped', '/warped/{file:.*}')
+    config.add_route('pick', '/pick')
     config.add_route('picture', '/picture/{file:.*}')
     config.add_route('plants', '/plant')
     config.add_route('plant', '/plant/{name:.*}')

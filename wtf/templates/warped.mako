@@ -25,11 +25,19 @@
 <div class="suggestion">
   <h3>${plant}</h3>
   <div class="suggestedPlant">
+  <form action="/pick" method="POST" id="pick Form"
+      enctype="multipart/form-data">
+
+ 
   %if data[0].filename:
     <img src="/thumbs/medium/${data[0].filename}"/>
   %else:
      <img src="/media/tree_icon.png"/>
   %endif
+   <input type="hidden" name="plant" value="${plant}"/>
+   <input type="hidden" name="leaf" value="${uuid}"/>
+   <input type="submit" value="pick" name="pick"/>
+  </form>
  </div>
  <div class="leafs">  
   %for leaf in data[1]:
