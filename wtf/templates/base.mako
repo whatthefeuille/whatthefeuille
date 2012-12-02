@@ -48,6 +48,15 @@
     </div>
 
     <div class="container">
+      %if messages:
+      %for message in messages:
+      <div class="alert-message warning fade in" data-alert="alert">
+            <a class="close" href="#">×</a>
+            <p>${message}</p>
+      </div>
+      %endfor
+      %endif
+
       ${self.body()}
 
       <hr>
