@@ -30,12 +30,12 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li><a href="/plant">Plantopedia</a></li>
-              <li><a href="/upload">Upload Snapshot</a></li>
               %if user:
               <li>
                   <a href="/profile">My snapshots</a>
               </li>
               % endif
+              <li><a href="/upload">Upload Snapshot</a></li>
               <li><a href="/about">About</a></li>
             </ul>
             <ul class="nav pull-right">
