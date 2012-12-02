@@ -43,8 +43,8 @@ def test_warp_img():
 
     expected_warped_path = os.path.join(TEMP_FOLDER, 'platane-1_warped.jpeg')
     assert_equals(warped_path, expected_warped_path)
-    assert_equals(warped_base, (400, 250))
-    assert_equals(warped_top, (50, 250))
+    assert_equals(warped_base, (450, 250))
+    assert_equals(warped_top, (25, 250))
     assert_true(os.path.exists(warped_path))
 
     # The resulting image has a fixed size

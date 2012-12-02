@@ -1,4 +1,3 @@
-import shutil
 import os
 import datetime
 from uuid import uuid4
@@ -23,7 +22,6 @@ import wtf
 from wtf.processing import (
     get_img_size,
     get_original_path,
-    get_warped_img_path,
     save_normalized,
     warp_img,
 )
@@ -74,7 +72,7 @@ def about(request):
     return _basic(request)
 
 
-@view_config(route_name='plants', request_method='GET', 
+@view_config(route_name='plants', request_method='GET',
              renderer='plants.mako')
 def plants(request):
     """Plants page."""
@@ -88,14 +86,14 @@ def plants(request):
     return _basic(request, data)
 
 
-@view_config(route_name='plant', request_method='GET', 
+@view_config(route_name='plant', request_method='GET',
              renderer='plant.mako')
 def plant(request):
     """Plant page."""
     name = request.matchdict['file']
     query = FieldQuery(FieldParameter('plant', name))
     snaps = request.elasticsearch.search(query, size=10, indices=['snaps'])
-    
+
     query = FieldQuery(FieldParameter('name', name))
     plant = list(request.elasticsearch.search(query, indices=['plants']))[0]
 
@@ -103,10 +101,10 @@ def plant(request):
     if filename:
         image = '/thumbs/large/' + os.path.basename(filename)
     else:
-        image = '/media/tree_icon.png' 
+        image = '/media/tree_icon.png'
 
     data = {'name': name,
-            'image': image, 
+            'image': image,
             'snaps': snaps,
             'basename': os.path.basename,
             'format_date': format_es_date}
@@ -201,8 +199,8 @@ def snapshot(request):
             return HTTPNotFound()
 
     if request.method == 'POST':
-        base = _toint(request.POST['bottom_x']), _toint(request.POST['bottom_y'])
-        top = _toint(request.POST['top_x']), _toint(request.POST['top_y'])
+        base = _toint(request.POST['bottom_y']), _toint(request.POST['bottom_x'])
+        top = _toint(request.POST['top_y']), _toint(request.POST['top_x'])
         warped_image, new_base, new_top = warp_img(orig_img, base, top)
         return HTTPFound(location='/warped/%s' %
                 os.path.basename(warped_image))
@@ -267,12 +265,12 @@ def upload(request):
 @view_config(route_name='upload_plant', request_method=('GET', 'POST'),
              renderer='upload_plant.mako')
 def upload_plant(request):
-    index, type_, root = 'plants', 'planttype', 'plant'    
+    index, type_, root = 'plants', 'planttype', 'plant'
     ext = ''
- 
+
     if request.user is None:
         raise Forbidden()
- 
+
     if request.method == 'POST':
         pic = request.POST.get('picture')
         basename = request.POST.get('name', str(uuid4()))
@@ -299,7 +297,7 @@ def upload_plant(request):
             log.error("Error while saving index")
             log.error(res)
             raise HTTPServerError()
-        
+
         request.elasticsearch.refresh()
         request.session.flash('Image uploaded')
         return HTTPFound(location='/%s/%s' % (root, basename + ext))
@@ -326,9 +324,9 @@ def upload_plant_snaps(request):
             log.error("Error while saving index")
             log.error(res)
             raise HTTPServerError()
-        
+
         uploaded +=1
-    
+
     request.elasticsearch.refresh()
     request.session.flash("Uploaded %d snaps" % uploaded)
     return HTTPFound(location='/plant/%s' % plantname)
@@ -352,7 +350,7 @@ def _save_pic(fileupload, request, basename=None):
 def _upload(request, index, type_, root):
     if request.user is None:
         raise Forbidden()
- 
+
     if request.method == 'POST':
         pic = request.POST.get('picture')
         basename = request.POST.get('name', str(uuid4()))
