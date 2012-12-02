@@ -269,7 +269,7 @@ def upload_plant_snaps(request):
         if name == 'name':
             continue
 
-        filename = _save_pic(value, request)
+        filename, ext = _save_pic(value, request)
         doc = {
 	   'user': request.user.id,
            'timestamp': datetime.datetime.utcnow(),
@@ -300,7 +300,7 @@ def _save_pic(fileupload, request, basename=None):
 	os.makedirs(pic_dir)
     save_normalized(pic, filename)
     pic.close()
-    return filename
+    return filename, ext
 
 
 def _upload(request, index, type_, root):
@@ -309,10 +309,10 @@ def _upload(request, index, type_, root):
  
     if request.method == 'POST':
         pic = request.POST.get('picture')
-        basename = request.POST.get('name')
+        basename = request.POST.get('name', str(uuid4()))
 
-        if pic:	
-            filename = _save_pic(pic, request, basename)
+        if pic is not None:	
+            filename, ext = _save_pic(pic, request, basename)
         else:
             filename = None
             ext = ''
