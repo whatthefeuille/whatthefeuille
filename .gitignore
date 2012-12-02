@@ -14,3 +14,4 @@ wtf/data
 wtf/images
 
 .DS_Store
+*.log
