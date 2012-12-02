@@ -66,9 +66,8 @@ body {
 .timeline li .image .name {
     position: absolute;
     font-size: 24px;
-    font-weight: bold;
     color: white;
-    text-shadow: 2px 2px 1px #222;
+    text-shadow: 2px 2px 2px #111;
     text-decoration: none;
     padding-left: 18px;
     padding-top: 12px;
