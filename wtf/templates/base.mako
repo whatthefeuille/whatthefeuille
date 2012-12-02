@@ -31,6 +31,11 @@
             <ul class="nav">
               <li><a href="/plant">Plantopedia</a></li>
               <li><a href="/upload">Upload Snapshot</a></li>
+              %if user:
+              <li>
+                  <a href="/profile">My snapshots</a>
+              </li>
+              % endif
               <li><a href="/about">About</a></li>
             </ul>
             <ul class="nav pull-right">
@@ -41,9 +46,6 @@
                         ${user.email}
                         <b class="caret"></b>
                     <ul class="dropdown-menu">
-                        <li>
-                            <a href="/profile">My snapshots</a>
-                        </li>
                         <li>
                             <a href="/logout">Logout</a>
                         </li>

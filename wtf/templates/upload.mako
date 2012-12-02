@@ -3,7 +3,7 @@
 <script src="/media/js/jquery.cookie.js"></script>
 <script src="/media/js/wtf.js"></script>
 
-<h3>Upload a snapshot of a leaf</h3>
+<h3>Upload a leaf snapshot</h3>
 
 <p class="tip alert alert-info">Tip: try to put the leaf on a contrasted, unified background</p>
 
