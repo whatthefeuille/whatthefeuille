@@ -14,7 +14,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.2 r9819"
-   sodipodi:docname="New document 1">
+   sodipodi:docname="camera_icon.svg">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -25,7 +25,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.78619048"
-     inkscape:cx="299.77286"
+     inkscape:cx="526.18109"
      inkscape:cy="372.04724"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -53,31 +53,31 @@
      id="layer1"
      transform="translate(0,-308.2677)">
     <g
-       id="g3761">
+       id="g3814">
       <rect
-         y="574.10657"
-         x="314.40036"
+         y="572.83459"
+         x="266.06601"
          height="212.41672"
          width="423.56146"
          id="rect2985"
          style="fill:#000000;fill-opacity:1;stroke:#000600;stroke-width:85.19999695;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-      <path
-         transform="matrix(0.94350517,0,0,0.94350517,97.746301,88.066872)"
-         d="m 543.12539,627.71045 a 89.036949,71.865532 0 1 1 -178.0739,0 89.036949,71.865532 0 1 1 178.0739,0 z"
-         sodipodi:ry="71.865532"
-         sodipodi:rx="89.036949"
-         sodipodi:cy="627.71045"
-         sodipodi:cx="454.08844"
-         id="path3755"
-         style="fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:58.90000153;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-         sodipodi:type="arc" />
       <rect
-         y="501.29431"
-         x="539.30951"
+         y="500.02237"
+         x="490.97516"
          height="46.162308"
          width="143.73106"
          id="rect3759"
          style="fill:#000000;fill-opacity:1;stroke:#000300;stroke-width:67.05696869;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <path
+         transform="translate(307.81344,114.93033)"
+         d="m 228.95216,576.83221 a 59.145973,59.145973 0 1 1 -118.29195,0 59.145973,59.145973 0 1 1 118.29195,0 z"
+         sodipodi:ry="59.145973"
+         sodipodi:rx="59.145973"
+         sodipodi:cy="576.83221"
+         sodipodi:cx="169.80618"
+         id="path3788"
+         style="fill:#000000;fill-opacity:1;stroke:#fffeff;stroke-width:58.90000153;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+         sodipodi:type="arc" />
     </g>
   </g>
 </svg>
