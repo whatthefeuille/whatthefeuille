@@ -21,7 +21,6 @@
         <a class="image" href="/plant/${plant.name}"
           style="background-image: url('/media/tree_icon.png')">
              <span>${plant.name}<span>
-             <p>put a generic image here. </p>
         </a>
         %endif
         <div class="bar">
