@@ -33,22 +33,22 @@ class Request(BaseRequest):
         """
         email = authenticated_userid(self)
         if email is not None:
-	    query = FieldQuery(FieldParameter('email', email))
-	    res = self.db.search(query)
-	    if len(res) == 0:
-		doc = {
-		    'id': str(uuid4()),
-		    'email': email,
-		    'registered': datetime.datetime.utcnow(),
-		}
-		res = self.db.index(doc, 'users', 'usertype', doc['id'])
-		if res['ok'] == False:
-		    logger.error("Signup failure")
-		    logger.error(res)
-		    raise HTTPServerError()
-		self.db.refresh()
+            query = FieldQuery(FieldParameter('email', email))
+            res = self.db.search(query)
+            if len(res) == 0:
+                doc = {
+                    'id': str(uuid4()),
+                    'email': email,
+                    'registered': datetime.datetime.utcnow(),
+                }
+                res = self.db.index(doc, 'users', 'usertype', doc['id'])
+                if res['ok'] == False:
+                    logger.error("Signup failure")
+                    logger.error(res)
+                    raise HTTPServerError()
+                self.db.refresh()
                 res = [namedtuple('User', doc.keys())(**doc)]
-          
+
             if len(res) > 0:
                 return res[0]
 
@@ -77,7 +77,6 @@ def main(global_config, **settings):
     # routing
     config.add_route('index', '/')
     config.add_route('profile', '/profile')
-    config.add_route('sign', '/sign')
     config.add_route('logout', '/logout')
     config.add_route('about', '/about')
     config.add_route('upload', '/upload')

@@ -9,7 +9,7 @@ from pyramid.httpexceptions import (
     HTTPServerError,
 )
 from pyramid.response import FileResponse
-from pyramid.security import authenticated_userid, forget
+from pyramid.security import forget
 from pyramid.exceptions import Forbidden
 
 from mako.lookup import TemplateLookup
@@ -144,32 +144,6 @@ def profile(request):
             'format_date': format_es_date}
 
     return _basic(request, data)
-
-
-@view_config(route_name='sign')
-def sign(request):
-    """Initiates a Browser-ID challenge."""
-    email = authenticated_userid(request)
-    if email is None:
-        raise Forbidden()
-
-    # Signup new user
-    query = FieldQuery(FieldParameter('email', email))
-    res = request.db.search(query)
-    if len(res) == 0:
-        doc = {
-            'id': str(uuid4()),
-            'email': email,
-            'registered': datetime.datetime.utcnow(),
-        }
-        res = request.db.index(doc, 'users', 'usertype', doc['id'])
-        if res['ok'] == False:
-            logger.error("Signup failure")
-            logger.error(res)
-            raise HTTPServerError()
-        request.db.refresh()
-
-    return HTTPFound(location='/')
 
 
 @view_config(route_name='logout')
