@@ -6,6 +6,8 @@ from skimage.io import imsave
 
 from PIL import Image
 
+from wtf import logger
+
 
 EXIF_TAG_ORIENTATION = 0x0112
 
@@ -109,17 +111,26 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
 
     warped_vector = warped_top - warped_base
     warped_norm = np.linalg.norm(warped_vector)
-    scale = warped_norm / orig_norm
-    rotation = np.arccos(
-        np.dot(warped_vector, orig_vector) /
-        (orig_norm * warped_norm)
-    )
 
-    pil_rotated = Image.fromarray(embedded).rotate(
-        -rotation * 180. / np.pi)
+    if orig_norm == 0:
+        logger.warning("Cannot warp image using a null original vector")
+        # Cannot warp with this data, return null operation insted
+        return raw_img_path, tuple(base), tuple(top)
+
+    scale = warped_norm / orig_norm
+
+    rotation = (np.arctan2(warped_vector[0], warped_vector[1])
+                - np.arctan2(orig_vector[0], orig_vector[1]))
+    rotation %= 2 * np.pi
+
+    rotation_degrees = rotation * -180. / np.pi
+
+    pil_rotated = Image.fromarray(embedded).rotate(rotation_degrees)
 
     scaled_size = (int(embedded.shape[0] * scale),
                    int(embedded.shape[1] * scale))
+    logger.info("Warping from %r to %r using rot=%0.2f scale=%0.2f",
+                orig_vector, warped_vector, rotation_degrees, scale)
 
     pil_scaled = pil_rotated.resize(scaled_size, Image.ANTIALIAS)
 
