@@ -1,3 +1,7 @@
+from collections import namedtuple
+import datetime
+from uuid import uuid4
+
 from pyramid.config import Configurator
 from pyramid.decorator import reify
 from pyramid.request import Request as BaseRequest
@@ -5,6 +9,8 @@ from pyramid.security import authenticated_userid
 
 from pyes.query import FieldQuery, FieldParameter
 from pyramid_beaker import session_factory_from_settings
+
+from wtf import logger
 
 
 class Request(BaseRequest):
@@ -27,10 +33,25 @@ class Request(BaseRequest):
         """
         email = authenticated_userid(self)
         if email is not None:
-            query = FieldQuery(FieldParameter('email', email))
-            res = self.db.search(query)
+	    query = FieldQuery(FieldParameter('email', email))
+	    res = self.db.search(query)
+	    if len(res) == 0:
+		doc = {
+		    'id': str(uuid4()),
+		    'email': email,
+		    'registered': datetime.datetime.utcnow(),
+		}
+		res = self.db.index(doc, 'users', 'usertype', doc['id'])
+		if res['ok'] == False:
+		    logger.error("Signup failure")
+		    logger.error(res)
+		    raise HTTPServerError()
+		self.db.refresh()
+                res = [namedtuple('User', doc.keys())(**doc)]
+          
             if len(res) > 0:
                 return res[0]
+
         return None
 
 
