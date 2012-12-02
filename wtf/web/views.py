@@ -230,13 +230,15 @@ def warped(request):
         candidates = request.db.search(query, size=200, indices=['snaps'],
                                        sort='timestamp:desc')
 
+        logger.debug('Computing suggestion for %s', current_snap.filename)
         best_snaps, scores = suggest_snaps(current_snap, candidates, pic_dir,
                                            FEATURES_CACHE)
         suggestions = OrderedDict()
         for i, (snap, score) in enumerate(zip(best_snaps, scores)):
             if snap.get('plant') is not None:
                 name = snap.plant
-                logger.debug("#%02d: %s with score: %f", i, name, score)
+                logger.debug("#%02d: %s with score = %f - %s",
+                             i, name, score, snap.filename)
                 suggestion = suggestions.get(name)
                 if suggestion is None:
                     query = FieldQuery(FieldParameter('name', name))
@@ -249,7 +251,9 @@ def warped(request):
                 else:
                     suggestion[1].append(snap)
             else:
-                logger.warning("Ignoring snap #%02d with missing plant info", i)
+                logger.warning(
+                    "%02d skipped (missing plant info) with score %f - %s",
+                    i, score, snap.filename)
     else:
         suggestions = None
 
