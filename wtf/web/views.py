@@ -93,10 +93,11 @@ def plants(request):
 def plant(request):
     """Plant page."""
     name = request.matchdict['file']
-    query = FieldQuery(plant=name)
+    query = FieldQuery(FieldParameter('plant', name))
     snaps = request.elasticsearch.search(query, size=10, indices=['snaps'])
-    media = '/media/tree_icon.png'
-    data = {'plant': name,
+    image = '/media/tree_icon.png'
+
+    data = {'name': name,
             'image': image, 
             'snaps': snaps,
             'basename': os.path.basename,
@@ -260,6 +261,47 @@ def upload_plant(request):
     return _upload(request, 'plants', 'planttype', 'plant')
 
 
+@view_config(route_name='upload_plant_snaps', request_method='POST')
+def upload_plant_snaps(request):
+    plantname = request.POST['name']
+    uploaded = 0
+    for name, value in request.POST.items():
+        if name == 'name':
+            continue
+
+        filename = _save_pic(value, request)
+        doc = {
+	   'user': request.user.id,
+           'timestamp': datetime.datetime.utcnow(),
+           'filename': filename,
+           'plant': plantname
+        }
+        res = request.elasticsearch.index(doc, 'snaps', 'snaptype')
+        if not res['ok']:
+            log.error("Error while saving index")
+            log.error(res)
+            raise HTTPServerError()
+
+        uploaded +=1
+
+    request.session.flash("Uploaded %d snaps" % uploaded)
+    return HTTPFound(location='/plant/%s' % plantname)
+
+
+def _save_pic(fileupload, request, basename=None):
+    if basename is None:
+        basename = str(uuid4())
+    pic = fileupload.file
+    ext = os.path.splitext(fileupload.filename)[-1]
+    settings = dict(request.registry.settings)
+    pic_dir = settings['thumbs.document_root']
+    filename = os.path.join(pic_dir, basename + ext)
+    if not os.path.exists(pic_dir):
+	os.makedirs(pic_dir)
+    save_normalized(pic, filename)
+    pic.close()
+    return filename
+
 
 def _upload(request, index, type_, root):
     if request.user is None:
@@ -267,23 +309,13 @@ def _upload(request, index, type_, root):
  
     if request.method == 'POST':
         pic = request.POST.get('picture')
+        basename = request.POST.get('name')
 
         if pic:	
-            pic = request.POST['picture'].file
-            ext = os.path.splitext(request.POST['picture'].filename)[-1]
-            settings = dict(request.registry.settings)
-            pic_dir = settings['thumbs.document_root']
-            filename = os.path.join(pic_dir, basename + ext)
-            basename = str(uuid4())
-            if not os.path.exists(pic_dir):
-                os.makedirs(pic_dir)
-
-            save_normalized(pic, filename)
-            pic.close()
+            filename = _save_pic(pic, request, basename)
         else:
             filename = None
             ext = ''
-            basename = request.POST.get('name', str(uuid4))
 
         # Add to Elastic Search
         doc = {
