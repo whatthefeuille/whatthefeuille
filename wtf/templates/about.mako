@@ -18,11 +18,11 @@
     <li><a href="http://numpy.scipy.org/">Numpy</a></li>
     <li><a href="http://scipy.org/">Scipy</a></li>
     <li>Computer Vision (<a href="http://scikit-image.org/">scikit-image</a>)</li>
-    <li>Machine Learning (<a href="scikit-learn.org/">scikit-learn</a>)</li>
+    <li>Machine Learning (<a href="http://scikit-learn.org/">scikit-learn</a>)</li>
     <li><a href="http://twitter.github.com/bootstrap/">Bootstrap</a></li>
     <li><a href="http://www.mozilla.org/persona/">Mozilla Persona</a></li>
     <li><a href="http://gravatar.com/">Gravatar</a></li>
-    <li>HTML5 <a href="http://dev.w3.org/geo/api/spec-source.html">Geolocation</a> and <a href="http://www.w3.org/TR/html-me<li>capture/">Media Capture</a></li>
+    <li>HTML5 <a href="http://dev.w3.org/geo/api/spec-source.html">Geolocation</a> and <a href="http://www.w3.org/TR/html-media-capture/">Media Capture</a></li>
 </ul>
 
 <h4>Design</h4>
