@@ -15,6 +15,14 @@ body {
     margin-left: 0 !important;
 }
 
+.alert p {
+    margin-bottom: 0;
+}
+
+h3 {
+    margin-top: 0;
+}
+
 .sign img {
     margin-top: 1px;
 }

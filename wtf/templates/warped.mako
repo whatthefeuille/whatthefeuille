@@ -6,8 +6,6 @@
 %else:
   <h3>Leaf from ${snap.plant}</h3>
 %endif
- 
-<p>Click the image to edit the transformation.</p>
 
 <form action="." method="post">
   <div>
@@ -16,6 +14,9 @@
     </a>
   </div>
 </form>
+
+<p class="tip">Tip: click on the image to correct the leaf alignment.</p>
+
 
 %if not snap.plant:
 <h3>Suggestions</h3>
@@ -28,7 +29,6 @@
   <form action="/pick" method="POST" id="pick Form"
       enctype="multipart/form-data">
 
- 
   %if data[0].filename:
     <img src="/thumbs/medium/${data[0].filename}"/>
   %else:
@@ -39,7 +39,7 @@
    <input type="submit" value="pick" name="pick"/>
   </form>
  </div>
- <div class="leafs">  
+ <div class="leafs">
   %for leaf in data[1]:
     <img src="/thumbs/small/${leaf.filename}"/>
   %endfor
