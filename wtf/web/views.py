@@ -25,6 +25,7 @@ from wtf.processing import (
     get_original_path,
     save_normalized,
     warp_img,
+    suggest_snaps,
 )
 from wtf import logger
 
@@ -221,24 +222,34 @@ def warped(request):
 
     file_uuid = os.path.splitext(filename)[0]
     snap_idx, snap_type = 'snaps', 'snaptype'
-    snap = request.db.get(snap_idx, snap_type, file_uuid[:-len('_warped')])
+    current_snap = request.db.get(snap_idx, snap_type,
+                                  file_uuid[:-len('_warped')])
 
-    if not snap.plant:
+    if not current_snap.plant:
+        query = FieldQuery(FieldParameter('warped', True))
+        candidates = request.db.search(query, size=200, indices=['snaps'],
+                                       sort='timestamp:desc')
 
-        def _best(plant):
-           """Return 3 leaves from the plant"""
-           query = FieldQuery(FieldParameter('plant', plant))
-           return list(request.db.search(query, size=3, indices=['snaps'],
-                                    sort='timestamp'))
-
-        query = StringQuery('*')
-        snaps = request.db.search(query, size=10, indices=['plants'],
-                                  sort='name')
-
-        plants = [(snap['name'], (snap, _best(snap['name']))) for snap in snaps]
-        plants.reverse()
-        suggestions = OrderedDict(plants)
-
+        best_snaps, scores = suggest_snaps(current_snap, candidates, pic_dir,
+                                           FEATURES_CACHE)
+        suggestions = OrderedDict()
+        for i, (snap, score) in enumerate(zip(best_snaps, scores)):
+            if snap.get('plant') is not None:
+                name = snap.plant
+                logger.debug("#%02d: %s with score: %f", i, name, score)
+                suggestion = suggestions.get(name)
+                if suggestion is None:
+                    query = FieldQuery(FieldParameter('name', name))
+                    plants = list(request.db.search(query, indices=['plants']))
+                    if not plants:
+                        raise HTTPNotFound("No plant registered under %s"
+                                           % name)
+                    plant = plants[0]
+                    suggestions[name] = (plant, [snap])
+                else:
+                    suggestion[1].append(snap)
+            else:
+                logger.warning("Ignoring snap #%02d with missing plant info", i)
     else:
         suggestions = None
 
@@ -257,7 +268,7 @@ def warped(request):
             'original': get_original_path(filename),
             'width': width,
             'height': height,
-            'snap': snap,
+            'snap': current_snap,
             'uuid': file_uuid,
             'suggestions': suggestions}
 
