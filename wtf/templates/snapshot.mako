@@ -3,7 +3,7 @@
 <h3>Step 1/3 - Align your leaf!</h3>
 <p id="step">Select the top of the leaf</p>
 
-<form name="pointform" method="post" action="/snapshot/${snapshot}">
+<form id="pointform" name="pointform" method="post" action="/snapshot/${snapshot}">
     <div class="snapshot" id="pointer_div" style="background-image: url('/picture/${snapshot}'); width: ${width}px; height:${height}px" title="Select the top of the leaf">
         <img src="/media/top.png" id="topcross">
         <img src="/media/bottom.png" id="bottomcross">
@@ -18,7 +18,6 @@
     <input type="hidden" id="top_y" name="top_y">
     <input type="hidden" id="bottom_x" name="bottom_x">
     <input type="hidden" id="bottom_y" name="bottom_y">
-    <input type="submit" value="Looks good!" name="ok">
 </form>
 
 <script src="/media/js/wtf.js"></script>

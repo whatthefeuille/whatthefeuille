@@ -32,7 +32,7 @@ $("#pointer_div").click(function(e) {
         cross.show();
         $("#step").text("Select the top of the leaf.");
         $(".snapshot").attr("title", "Select the top of the leaf.");
-        $('input[type="submit"]').removeAttr('disabled');
+        $('#pointform').submit()
     }
 });
 
@@ -43,17 +43,17 @@ var accuracy;
 
 function loadLocation() {
   if (navigator.geolocation) {
-    
+
     if ($.cookie("posLat")) {
 	latitude = $.cookie("posLat");
 	longitude = $.cookie("posLon");
 	accuracy = $.cookie("posAccuracy");
 	updateDisplay();
-	
+
     } else {
 	navigator.geolocation.getCurrentPosition(
-			    success_handler, 
-			    error_handler, 
+			    success_handler,
+			    error_handler,
 			    {timeout:10000});
     }
 }
