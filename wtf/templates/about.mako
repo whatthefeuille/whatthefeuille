@@ -1,8 +1,8 @@
 <%inherit file="base.mako"/>
 
-<h3>About this project...</h3>
+<h3>About this project</h3>
 
-<h4>Code</h4>
+<h4>Developers</h4>
 <ul>
     <li><a href="https://github.com/tarekziade/">Tarek Ziade</a></li>
     <li><a href="https://github.com/ogrisel/">Olivier Grisel</a></li>
@@ -22,11 +22,15 @@
     <li><a href="http://twitter.github.com/bootstrap/">Bootstrap</a></li>
     <li><a href="http://www.mozilla.org/persona/">Mozilla Persona</a></li>
     <li><a href="http://gravatar.com/">Gravatar</a></li>
-    <li>HTML5 <a href="http://dev.w3.org/geo/api/spec-source.html">Geolocation</a> and <a href="http://www.w3.org/TR/html-media-capture/">Media Capture</a></li>
+    <li>HTML5 <a href="http://dev.w3.org/geo/api/spec-source.html">Geolocation</a> and <a href="http://www.w3.org/TR/html-media-capture/">Media Capture</a> APIs</li>
 </ul>
 
 <h4>Design</h4>
 
 <ul>
-    <li><a href="http://thenounproject.com/noun/leaf/#icon-No6496" target="_blank">Leaf</a> designed by <a href="http://thenounproject.com/mateozlatar" target="_blank">Mateo Zlatar</a> from The Noun Project.</li>
+    <li><a href="http://thenounproject.com/noun/leaf/#icon-No6496" target="_blank">Leaf</a> designed by <a href="http://thenounproject.com/mateozlatar" target="_blank">Mateo Zlatar</a> from The Noun Project</li>
 </ul>
+
+<h4>Contribute</h4>
+
+<p>The source code is available on <a href="https://github.com/whatthefeuille/whatthefeuille">GitHub</a>.</p>
