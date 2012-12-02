@@ -105,6 +105,9 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
 
     warped_base = ((0.8, 0.5) * warped_img_size).astype(np.int)
     warped_top = ((0.1, 0.5) * warped_img_size).astype(np.int)
+    logger.debug("About to warp from {base, top = %r %r} to "
+                 "{warped_base, warped_top = %r %r}",
+                 base, top, warped_base, warped_top)
 
     orig_vector = embedded_top - embedded_base
     orig_norm = np.linalg.norm(orig_vector)
