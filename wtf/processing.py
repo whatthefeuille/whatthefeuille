@@ -195,7 +195,7 @@ def compute_features_collection(snaps, pic_dir, cache=None):
         snaps_with_features.append(snap)
         features_list.append(new_features)
 
-    return snaps_with_features, features_list
+    return snaps_with_features, np.array(features_list)
 
 
 def suggest_snaps(query_snap, other_snaps, pic_dir, cache=None,
@@ -205,7 +205,7 @@ def suggest_snaps(query_snap, other_snaps, pic_dir, cache=None,
         cache = {}
 
     if not query_snap.warped:
-        raise ValueError()
+        raise ValueError("Cannot make suggestion on unwarped snapshot")
     query_features = cache.get(query_snap.filename)
     if query_features is None:
         query_warped_file_path = os.path.join(
@@ -215,10 +215,16 @@ def suggest_snaps(query_snap, other_snaps, pic_dir, cache=None,
 
     snaps, features = compute_features_collection(
         other_snaps, pic_dir, cache=cache)
-    snaps = np.array(snaps)
 
+    # wrap query as a 2D array to use the pairwise distance API
+    query_features = query_features.reshape((1, -1))
     if criterion == 'euclidean_distance':
-        scores = pairwise_distances([query_features], features).ravel()
+        try:
+            scores = pairwise_distances(query_features, features).ravel()
+        except ValueError as e:
+            logger.error("%r, invalid features: %r and %r",
+                         e, query_features, features, exc_info=True)
+            return [], []
         minimize = True
     else:
         raise NotImplementedError('criterion: ' + criterion)
@@ -227,4 +233,4 @@ def suggest_snaps(query_snap, other_snaps, pic_dir, cache=None,
         ordering = np.argsort(scores)
     else:
         ordering = np.argsort(scores)[::-1]
-    return snaps[ordering], scores[ordering]
+    return np.array(snaps)[ordering], scores[ordering]

@@ -25,6 +25,7 @@ from wtf.processing import (
     get_original_path,
     save_normalized,
     warp_img,
+    compute_features_collection,
     suggest_snaps,
 )
 from wtf import logger
@@ -197,8 +198,8 @@ def snapshot(request):
             logger.debug("Updating snap %s: %r", file_uuid, snap)
             request.db.index(snap, snap_idx, snap_type, file_uuid)
             request.db.refresh()
-            # TODO: compute features here
-            FEATURES_CACHE[warped_filename] = 'FEATURES'
+            # Precompute the cached features incrementally
+            compute_features_collection([snap], pic_dir, cache=FEATURES_CACHE)
         else:
             logger.warning("Could not find snap for %s", file_uuid)
         return HTTPFound(location='/warped/%s' % warped_filename)
