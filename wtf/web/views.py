@@ -195,7 +195,7 @@ def snapshot(request):
             snap['base_y'] = base[1]
             snap['top_x'] = top[0]
             snap['top_y'] = top[1]
-            logger.debug("Updating snap %s: %r", file_uuid, snap)
+            logger.debug("Warping snap %s", file_uuid)
             request.db.index(snap, snap_idx, snap_type, file_uuid)
             request.db.refresh()
             # Precompute the cached features incrementally
@@ -225,38 +225,63 @@ def warped(request):
     snap_idx, snap_type = 'snaps', 'snaptype'
     current_snap = request.db.get(snap_idx, snap_type,
                                   file_uuid[:-len('_warped')])
+    next_snap = None
+    unwarped_count = ""
 
     if not current_snap.plant:
         query = FieldQuery(FieldParameter('warped', True))
         candidates = request.db.search(query, size=200, indices=['snaps'],
                                        sort='timestamp:desc')
 
+        # TODO: filter out non-plant snaps in the query directly
+        candidates = [c for c in candidates if c.plant != None]
+
         logger.debug('Computing suggestion for %s', current_snap.filename)
         best_snaps, scores = suggest_snaps(current_snap, candidates, pic_dir,
                                            FEATURES_CACHE)
         suggestions = OrderedDict()
         for i, (snap, score) in enumerate(zip(best_snaps, scores)):
-            if snap.get('plant') is not None:
-                name = snap.plant
-                logger.debug("#%02d: %s with score = %f - %s",
-                             i, name, score, snap.filename)
-                suggestion = suggestions.get(name)
-                if suggestion is None:
-                    query = FieldQuery(FieldParameter('name', name))
-                    plants = list(request.db.search(query, indices=['plants']))
-                    if not plants:
-                        raise HTTPNotFound("No plant registered under %s"
-                                           % name)
-                    plant = plants[0]
-                    suggestions[name] = (plant, [snap])
-                else:
-                    suggestion[1].append(snap)
+            name = snap.plant
+            logger.debug("#%02d: %s with score = %f - %s",
+                         i, name, score, snap.filename)
+            suggestion = suggestions.get(name)
+            if suggestion is None:
+                query = FieldQuery(FieldParameter('name', name))
+                plants = list(request.db.search(query, indices=['plants']))
+                if not plants:
+                    raise HTTPNotFound("No plant registered under %s"
+                                       % name)
+                plant = plants[0]
+                suggestions[name] = (plant, [snap])
             else:
-                logger.warning(
-                    "%02d skipped (missing plant info) with score %f - %s",
-                    i, score, snap.filename)
+                suggestion[1].append(snap)
     else:
         suggestions = None
+
+        # Suggest to warp the next unwarped snapshot from the same plant
+        query = FieldQuery(fieldparameters=(
+            FieldParameter('warped', None),
+            FieldParameter('filename', '-' + current_snap.filename),
+            FieldParameter('plant', current_snap.plant)))
+        max_count = 100
+        next_snaps = request.db.search({
+            "bool" : {
+                "must" : [
+                    {'field': {'filename': '-' + current_snap.filename}},
+                    {'field': {'plant': current_snap.plant}},
+                ],
+                "must_not" : [
+                    {'field': {'warped': True}},
+                ],
+            },
+        }, size=max_count, indices=['snaps'], sort='timestamp:desc')
+        logger.debug(len(next_snaps))
+        if len(next_snaps) > 0:
+            next_snap = next_snaps[0]
+
+        unwarped_count = "%d" % len(next_snaps)
+        if len(next_snaps) == max_count:
+            unwarped_count += "+"
 
     if len(res) == 2:
         height, width = res
@@ -275,7 +300,9 @@ def warped(request):
             'height': height,
             'snap': current_snap,
             'uuid': file_uuid,
-            'suggestions': suggestions}
+            'suggestions': suggestions,
+            'next_snap': next_snap,
+            'unwarped_count': unwarped_count}
 
     return _basic(request, data)
 

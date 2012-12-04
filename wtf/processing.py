@@ -1,4 +1,5 @@
 import os
+import time
 import numpy as np
 
 from skimage.io import imread
@@ -139,8 +140,8 @@ def warp_img(raw_img_path, base, top, warped_img_size=WARPED_IMG_SIZE):
 
     scaled_size = (int(embedded.shape[0] * scale),
                    int(embedded.shape[1] * scale))
-    logger.info("Warping from %r to %r using rot=%0.2f scale=%0.2f",
-                orig_vector, warped_vector, rotation_degrees, scale)
+    logger.debug("Warping from %r to %r using rot=%0.2f scale=%0.2f",
+                 orig_vector, warped_vector, rotation_degrees, scale)
 
     pil_scaled = pil_rotated.resize(scaled_size, Image.ANTIALIAS)
 
@@ -199,7 +200,7 @@ def compute_features_collection(snaps, pic_dir, cache=None):
 
 
 def suggest_snaps(query_snap, other_snaps, pic_dir, cache=None,
-                  criterion='euclidean_distance'):
+                  criterion='euclidean_distance', max_suggestions=10):
     """Order snaps by similarity with the reference query"""
     if cache is None:
         cache = {}
@@ -213,24 +214,44 @@ def suggest_snaps(query_snap, other_snaps, pic_dir, cache=None,
         query_features = compute_features(query_warped_file_path)
         cache[query_snap.filename] = query_features
 
+    # filter out the query snap from the candidates
+    other_snaps = [s for s in other_snaps
+                   if s.filename != query_snap.filename]
+
     snaps, features = compute_features_collection(
         other_snaps, pic_dir, cache=cache)
 
     # wrap query as a 2D array to use the pairwise distance API
     query_features = query_features.reshape((1, -1))
-    if criterion == 'euclidean_distance':
-        try:
+    try:
+
+        if criterion == 'euclidean_distance':
+            minimize = True
             scores = pairwise_distances(query_features, features).ravel()
-        except ValueError as e:
-            logger.error("%r, invalid features: %r and %r",
-                         e, query_features, features, exc_info=True)
-            return [], []
-        minimize = True
-    else:
-        raise NotImplementedError('criterion: ' + criterion)
+        else:
+            raise NotImplementedError('criterion: ' + criterion)
+
+    except ValueError as e:
+        dump_folder = 'invalid_features'
+        if not os.path.exists(dump_folder):
+            os.makedirs(dump_folder)
+        now = time.time()
+        query_filename = os.path.join(
+            dump_folder, "%f_query_%s.txt" % (now, criterion))
+        others_filename = os.path.join(
+            dump_folder, "%f_others_%s.txt" % (now, criterion))
+        np.savetxt(query_filename, query_features)
+        np.savetxt(others_filename, features)
+        logger.error("%r, invalid features saved to %s and %s",
+                        e, query_filename, others_filename, exc_info=True)
+        return [], []
 
     if minimize:
         ordering = np.argsort(scores)
     else:
         ordering = np.argsort(scores)[::-1]
-    return np.array(snaps)[ordering], scores[ordering]
+
+    best_snaps = np.array(snaps)[ordering][:max_suggestions]
+    best_scores = scores[ordering][:max_suggestions]
+
+    return best_snaps, best_scores

@@ -47,5 +47,11 @@
   </div>
 </div>
 %endfor
+%endif
 
+%if next_snap:
+<hr>
+<h3>There are ${unwarped_count} more snapshots of ${snap.plant} to warp</h3>
+
+<p><a href="/snapshot/${next_snap.filename}">Warp next!</a></p>
 %endif
