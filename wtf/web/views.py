@@ -16,6 +16,7 @@ from pyramid.exceptions import Forbidden
 from mako.lookup import TemplateLookup
 
 from pyes.query import FieldQuery, FieldParameter, StringQuery
+from pyes.exceptions import NotFoundException
 
 from wtf.dates import format_es_date
 from wtf.gravatar import gravatar_image_url
@@ -170,7 +171,12 @@ def snapshot(request):
     pic_dir = settings['thumbs.document_root']
     file_path = os.path.join(pic_dir, filename)
 
-    height, width = get_img_size(file_path)
+    try:
+        height, width = get_img_size(file_path)
+    except IOError:
+        logger.error("Failed to open file with path: %s", file_path,
+                     exc_info=True)
+        raise HTTPNotFound("Could not load image for snap %s" % filename)
 
     # security loop
     elmts = filename.split(os.sep)
@@ -221,10 +227,23 @@ def warped(request):
     orig_img = os.path.join(pic_dir, filename)
     res = get_img_size(orig_img)
 
-    file_uuid = os.path.splitext(filename)[0]
+    warped_stemname = os.path.splitext(filename)[0]
     snap_idx, snap_type = 'snaps', 'snaptype'
-    current_snap = request.db.get(snap_idx, snap_type,
-                                  file_uuid[:-len('_warped')])
+
+    if warped_stemname.endswith('_warped'):
+        file_uuid = warped_stemname[:-len('_warped')]
+    else:
+        logger.warning(
+            'Warped stemname is expected to end with "_warped", got: %s',
+            warped_stemname
+        )
+        file_uuid = warped_stemname
+
+    try:
+        current_snap = request.db.get(snap_idx, snap_type, file_uuid)
+    except NotFoundException:
+        raise HTTPNotFound("Could not find snapshot for %s" % file_uuid)
+
     next_snap = None
     unwarped_count = ""
 
