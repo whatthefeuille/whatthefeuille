@@ -60,7 +60,9 @@ def get_original_path(warped_img):
     img_folder = os.path.dirname(warped_img)
     base_name = os.path.basename(warped_img)
     img_id, img_ext = os.path.splitext(base_name)
-    img_name = img_id[:-len("_warped")] + img_ext
+    if img_id.endswith("_warped"):
+        img_id = img_id[:-len("_warped")]
+    img_name = img_id + img_ext
     return os.path.join(img_folder, img_name)
 
 
